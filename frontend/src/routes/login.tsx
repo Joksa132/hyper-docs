@@ -1,12 +1,56 @@
 import { Button } from "@/components/ui/button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
 function LoginPage() {
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [fullName, setFullName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await authClient.signUp.email({
+          email,
+          password,
+          name: fullName,
+        });
+
+        if (error) {
+          return;
+        }
+
+        setIsSignUp(false);
+        return;
+      }
+
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        return;
+      }
+
+      router.navigate({ to: "/" });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       <div className="flex flex-1 flex-col justify-center px-6 py-12">
@@ -19,9 +63,13 @@ function LoginPage() {
           </Link>
 
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold">Welcome back</h1>
+            <h1 className="text-2xl font-semibold">
+              {isSignUp ? "Create your account" : "Welcome back"}
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Start collaborating with your team today
+              {isSignUp
+                ? "Start collaborating with your team today"
+                : "Sign in to continue to your documents"}
             </p>
           </div>
 
@@ -29,7 +77,9 @@ function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => {}}
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL}/google`;
+              }}
             >
               Continue with Google
             </Button>
@@ -37,19 +87,76 @@ function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => {}}
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL}/github`;
+              }}
             >
               Continue with GitHub
             </Button>
-
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={() => {}}
-            >
-              Continue with 3rd provider
-            </Button>
           </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {isSignUp && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="Name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <Button type="submit" className="w-full">
+              {isSignUp ? "Create account" : "Sign in"}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <span
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="font-medium text-foreground hover:underline cursor-pointer"
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </span>
+          </p>
         </div>
       </div>
 
