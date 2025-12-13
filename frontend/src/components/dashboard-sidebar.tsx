@@ -1,12 +1,4 @@
-import {
-  FileText,
-  LogOut,
-  Plus,
-  Settings,
-  Star,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { FileText, LogOut, Plus, Star, Trash2, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,12 +9,11 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { Button } from "./ui/button";
-import { Link, redirect } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
@@ -33,6 +24,7 @@ type DashboardSidebarProps = {
 };
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
+  const router = useRouter();
   const userInitials = user.name
     .split(" ")
     .map((part) => part[0])
@@ -119,18 +111,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"
                       className="w-full justify-start cursor-pointer"
                       onClick={async () => {
                         await authClient.signOut();
-                        redirect({ to: "/login" });
+                        router.navigate({ to: "/login" });
                       }}
                     >
                       <LogOut className="h-4 w-4" />
