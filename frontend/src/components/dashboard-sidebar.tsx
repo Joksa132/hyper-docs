@@ -46,10 +46,12 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
         <SidebarContent>
           <div className="p-4">
-            <Button className="w-full gap-2" onClick={() => {}}>
-              <Plus className="h-4 w-4" />
-              New document
-            </Button>
+            <Link to="/document/new">
+              <Button className="w-full gap-2">
+                <Plus className="h-4 w-4" />
+                New document
+              </Button>
+            </Link>
           </div>
 
           <SidebarMenu>
