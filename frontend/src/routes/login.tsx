@@ -2,11 +2,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession();
+
+    if (session) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   component: LoginPage,
 });
 
@@ -22,7 +34,7 @@ function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { data, error } = await authClient.signUp.email({
+        const { error } = await authClient.signUp.email({
           email,
           password,
           name: fullName,
@@ -36,7 +48,7 @@ function LoginPage() {
         return;
       }
 
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email,
         password,
       });
@@ -77,8 +89,11 @@ function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => {
-                window.location.href = `${import.meta.env.VITE_API_URL}/google`;
+              onClick={async () => {
+                await authClient.signIn.social({
+                  provider: "google",
+                  callbackURL: `${window.location.origin}/`,
+                });
               }}
             >
               Continue with Google
@@ -87,8 +102,11 @@ function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => {
-                window.location.href = `${import.meta.env.VITE_API_URL}/github`;
+              onClick={async () => {
+                await authClient.signIn.social({
+                  provider: "github",
+                  callbackURL: `${window.location.origin}/`,
+                });
               }}
             >
               Continue with GitHub

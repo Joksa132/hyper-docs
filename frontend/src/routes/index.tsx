@@ -1,8 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { authClient } from "@/lib/auth-client";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowRight, FileText, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession();
+
+    if (session) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   component: HomePage,
 });
 
