@@ -65,11 +65,11 @@ function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="flex flex-1 flex-col justify-center px-6 py-12">
-        <div className="mx-auto w-full max-w-sm">
+      <div className="flex flex-1 flex-col justify-center px-6 py-12 bg-linear-to-br from-background to-muted/30">
+        <div className="mx-auto w-full max-w-md">
           <Link to="/" className="mb-8 flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground">
-              <FileText className="h-6 w-6 text-background" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+              <FileText className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-3xl font-semibold">HyperDocs</span>
           </Link>
@@ -88,7 +88,7 @@ function LoginPage() {
           <div className="flex flex-col gap-4">
             <Button
               variant="outline"
-              className="w-full bg-transparent"
+              className="w-full bg-transparent font-medium hover:border-primary/50"
               onClick={async () => {
                 await authClient.signIn.social({
                   provider: "google",
@@ -101,7 +101,7 @@ function LoginPage() {
 
             <Button
               variant="outline"
-              className="w-full bg-transparent"
+              className="w-full bg-transparent font-medium hover:border-primary/50"
               onClick={async () => {
                 await authClient.signIn.social({
                   provider: "github",
@@ -161,7 +161,7 @@ function LoginPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full font-semibold">
               {isSignUp ? "Create account" : "Sign in"}
             </Button>
           </form>
@@ -178,10 +178,10 @@ function LoginPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-muted/30">
+      <div className="flex flex-1 items-center justify-center bg-linear-to-br from-primary/10 via-primary/5 to-background overflow-hidden">
         <div className="max-w-md px-8 text-center">
-          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-foreground">
-            <FileText className="h-8 w-8 text-background" />
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
+            <FileText className="h-8 w-8 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">
             Write smarter, together

@@ -20,8 +20,8 @@ function HomePage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-sm">
         <div className="mx-auto px-6 flex items-center justify-between h-16 max-w-6xl">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
-              <FileText className="h-4 w-4 text-background" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <FileText className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-lg font-semibold">HyperDocs</span>
           </div>
@@ -38,14 +38,16 @@ function HomePage() {
 
       <section className="relative px-6 pt-32 pb-24">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 px-4 py-1 inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 text-sm font-semibold">
+          <div className="mb-6 px-4 py-1 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-semibold">
             <Sparkles className="h-4 w-4" />
             <span>AI-powered writing assistant</span>
           </div>
           <h1 className="text-balance text-7xl font-semibold">
             Write together,
             <br />
-            <span className="text-muted-foreground">in real-time</span>
+            <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              in real-time
+            </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
             A modern document editor. Collaborate with live cursors, AI-assisted
