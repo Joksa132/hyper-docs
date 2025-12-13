@@ -71,23 +71,29 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Star className="h-4 w-4" />
-                <span>Starred</span>
+              <SidebarMenuButton asChild>
+                <Link to="/dashboard/starred">
+                  <Star className="h-4 w-4" />
+                  <span>Starred</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Users className="h-4 w-4" />
-                <span>Shared with me</span>
+              <SidebarMenuButton asChild>
+                <Link to="/dashboard/shared">
+                  <Users className="h-4 w-4" />
+                  <span>Shared with me</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Trash2 className="h-4 w-4" />
-                <span>Trash</span>
+              <SidebarMenuButton asChild>
+                <Link to="/dashboard/trash">
+                  <Trash2 className="h-4 w-4" />
+                  <span>Trash</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
