@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocumentRouteImport } from './routes/document'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DocumentNewRouteImport } from './routes/document/new'
 import { Route as DashboardTrashRouteImport } from './routes/dashboard/trash'
 import { Route as DashboardStarredRouteImport } from './routes/dashboard/starred'
 import { Route as DashboardSharedRouteImport } from './routes/dashboard/shared'
@@ -20,6 +22,11 @@ import { Route as DashboardSharedRouteImport } from './routes/dashboard/shared'
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentRoute = DocumentRouteImport.update({
+  id: '/document',
+  path: '/document',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -36,6 +43,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const DocumentNewRoute = DocumentNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => DocumentRoute,
 } as any)
 const DashboardTrashRoute = DashboardTrashRouteImport.update({
   id: '/trash',
@@ -56,28 +68,34 @@ const DashboardSharedRoute = DashboardSharedRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/document': typeof DocumentRouteWithChildren
   '/login': typeof LoginRoute
   '/dashboard/shared': typeof DashboardSharedRoute
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
+  '/document/new': typeof DocumentNewRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/document': typeof DocumentRouteWithChildren
   '/login': typeof LoginRoute
   '/dashboard/shared': typeof DashboardSharedRoute
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
+  '/document/new': typeof DocumentNewRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/document': typeof DocumentRouteWithChildren
   '/login': typeof LoginRoute
   '/dashboard/shared': typeof DashboardSharedRoute
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
+  '/document/new': typeof DocumentNewRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -85,33 +103,40 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/document'
     | '/login'
     | '/dashboard/shared'
     | '/dashboard/starred'
     | '/dashboard/trash'
+    | '/document/new'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/document'
     | '/login'
     | '/dashboard/shared'
     | '/dashboard/starred'
     | '/dashboard/trash'
+    | '/document/new'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/document'
     | '/login'
     | '/dashboard/shared'
     | '/dashboard/starred'
     | '/dashboard/trash'
+    | '/document/new'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  DocumentRoute: typeof DocumentRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
 
@@ -122,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/document': {
+      id: '/document'
+      path: '/document'
+      fullPath: '/document'
+      preLoaderRoute: typeof DocumentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -144,6 +176,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/document/new': {
+      id: '/document/new'
+      path: '/new'
+      fullPath: '/document/new'
+      preLoaderRoute: typeof DocumentNewRouteImport
+      parentRoute: typeof DocumentRoute
     }
     '/dashboard/trash': {
       id: '/dashboard/trash'
@@ -187,9 +226,22 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface DocumentRouteChildren {
+  DocumentNewRoute: typeof DocumentNewRoute
+}
+
+const DocumentRouteChildren: DocumentRouteChildren = {
+  DocumentNewRoute: DocumentNewRoute,
+}
+
+const DocumentRouteWithChildren = DocumentRoute._addFileChildren(
+  DocumentRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  DocumentRoute: DocumentRouteWithChildren,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
