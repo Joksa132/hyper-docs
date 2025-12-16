@@ -1,6 +1,6 @@
-import { DocumentHeader } from "@/components/document-header";
+import { apiFetch } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
 import { EditorContext, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline_ from "@tiptap/extension-underline";
@@ -11,15 +11,27 @@ import Highlight from "@tiptap/extension-highlight";
 import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import FontFamily from "@tiptap/extension-font-family";
+import { DocumentHeader } from "@/components/document-header";
 import { DocumentToolbar } from "@/components/document-toolbar";
 import { DocumentEditor } from "@/components/document-editor";
+import { useEffect, useMemo } from "react";
+import type { Document } from "@/lib/types";
 
-export const Route = createFileRoute("/document/new")({
-  component: NewDocumentPage,
+export const Route = createFileRoute("/document/$id")({
+  component: DocumentPage,
 });
 
-function NewDocumentPage() {
-  const [title, setTitle] = useState<string>("Untitled Document");
+function DocumentPage() {
+  const { id } = Route.useParams();
+
+  const getDocument = async (id: string) => {
+    return apiFetch<Document>(`/api/documents/${id}`);
+  };
+
+  const { data: doc } = useQuery<Document>({
+    queryKey: ["document", id],
+    queryFn: () => getDocument(id),
+  });
 
   const editor = useEditor({
     extensions: [
@@ -51,14 +63,23 @@ function NewDocumentPage() {
       FontFamily,
       FontSize,
     ],
+    immediatelyRender: false,
   });
 
+  useEffect(() => {
+    if (editor && doc) {
+      editor.commands.setContent(doc.content);
+    }
+  }, [editor, doc]);
+
   const providerValue = useMemo(() => ({ editor }), [editor]);
+
+  if (!doc || !editor) return null;
 
   return (
     <EditorContext.Provider value={providerValue}>
       <div className="flex flex-1 flex-col">
-        <DocumentHeader title={title} setTitle={setTitle} />
+        <DocumentHeader key={id} documentId={id} />
 
         <DocumentToolbar />
 
