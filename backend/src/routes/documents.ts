@@ -7,6 +7,23 @@ import { eq } from "drizzle-orm";
 
 export const documentsRoute = new Hono();
 
+documentsRoute.get("/", async (c) => {
+  const user = await getUser(c.req.raw);
+
+  const docs = await db
+    .select({
+      id: documents.id,
+      title: documents.title,
+      updatedAt: documents.updatedAt,
+      createdAt: documents.createdAt,
+    })
+    .from(documents)
+    .where(eq(documents.ownerId, user.id))
+    .orderBy(documents.updatedAt);
+
+  return c.json(docs);
+});
+
 documentsRoute.post("/", async (c) => {
   const user = await getUser(c.req.raw);
 
