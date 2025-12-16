@@ -51,7 +51,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   });
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className="flex min-h-screen bg-background">
       <Sidebar>
         <SidebarHeader>
           <div className="h-16 flex items-center gap-2 border-b border-border px-6">

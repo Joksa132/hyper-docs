@@ -31,10 +31,8 @@ function DashboardLayout() {
       <div className="flex min-h-screen bg-background">
         <DashboardSidebar user={user} />
 
-        <SidebarInset className="flex-1">
-          <main className="h-full">
-            <Outlet />
-          </main>
+        <SidebarInset className="w-full">
+          <Outlet />
         </SidebarInset>
       </div>
     </SidebarProvider>
