@@ -1,7 +1,7 @@
 import { apiFetch } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { EditorContext, useEditor } from "@tiptap/react";
+import { EditorContext, useEditor, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline_ from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
@@ -14,8 +14,9 @@ import FontFamily from "@tiptap/extension-font-family";
 import { DocumentHeader } from "@/components/document-header";
 import { DocumentToolbar } from "@/components/document-toolbar";
 import { DocumentEditor } from "@/components/document-editor";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Document } from "@/lib/types";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export const Route = createFileRoute("/document/$id")({
   component: DocumentPage,
@@ -23,6 +24,12 @@ export const Route = createFileRoute("/document/$id")({
 
 function DocumentPage() {
   const { id } = Route.useParams();
+
+  const [content, setContent] = useState<JSONContent | null>(null);
+
+  const debouncedContent = useDebounce(content, 3000);
+
+  const queryClient = useQueryClient();
 
   const getDocument = async (id: string) => {
     return apiFetch<Document>(`/api/documents/${id}`);
@@ -64,15 +71,43 @@ function DocumentPage() {
       FontSize,
     ],
     immediatelyRender: false,
+    onUpdate({ editor }) {
+      setContent(editor.getJSON());
+    },
   });
 
   useEffect(() => {
+    if (editor && doc && !editor.isEmpty) return;
     if (editor && doc) {
       editor.commands.setContent(doc.content);
     }
   }, [editor, doc]);
 
   const providerValue = useMemo(() => ({ editor }), [editor]);
+
+  const saveContent = async (content: JSONContent) => {
+    return apiFetch(`/api/documents/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ content }),
+    });
+  };
+
+  const saveMutation = useMutation({
+    mutationFn: saveContent,
+    onMutate: async () => {
+      queryClient.setQueryData(["save-status", id], "saving");
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["save-status", id], "saved");
+    },
+  });
+
+  useEffect(() => {
+    if (!debouncedContent) return;
+    if (!doc) return;
+
+    saveMutation.mutate(debouncedContent);
+  }, [debouncedContent]);
 
   if (!doc || !editor) return null;
 

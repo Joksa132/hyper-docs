@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import {
+  Check,
   Clock,
   FileText,
+  Loader2,
   MessageSquare,
   Share2,
   Sparkles,
@@ -12,7 +14,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-import type { Document } from "@/lib/types";
+import type { Document, SaveStatus } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 
@@ -54,6 +56,9 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
     mutate({ title: debouncedTitle });
   }, [debouncedTitle]);
 
+  const status =
+    queryClient.getQueryData<SaveStatus>(["save-status", documentId]) ?? "idle";
+
   return (
     <header className="h-14 flex justify-between items-center border-b border-border px-4">
       <div className="flex items-center gap-3">
@@ -71,6 +76,20 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
         <Button variant="ghost" size="sm">
           <Star className="h-4 w-4" />
         </Button>
+
+        {status === "saving" && (
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Saving…
+          </span>
+        )}
+
+        {status === "saved" && (
+          <span className="text-xs text-primary flex items-center gap-1">
+            <Check className="h-4 w-4" />
+            Saved
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

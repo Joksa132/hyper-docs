@@ -23,3 +23,5 @@ export type Document = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type SaveStatus = "idle" | "saving" | "saved";

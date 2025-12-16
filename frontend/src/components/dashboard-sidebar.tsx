@@ -18,7 +18,7 @@ import {
 } from "./ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import type { SessionUser } from "@/lib/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 
 type DashboardSidebarProps = {
@@ -34,6 +34,8 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     .join("")
     .toUpperCase();
 
+  const queryClient = useQueryClient();
+
   function createDocument() {
     return apiFetch<{ id: string }>("/api/documents", {
       method: "POST",
@@ -43,6 +45,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const { mutate: handleNewDoc } = useMutation({
     mutationFn: createDocument,
     onSuccess: ({ id }) => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
       router.navigate({ to: `/document/${id}` });
     },
   });
