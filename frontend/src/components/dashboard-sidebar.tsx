@@ -18,6 +18,8 @@ import {
 } from "./ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import type { SessionUser } from "@/lib/types";
+import { useMutation } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 type DashboardSidebarProps = {
   user: SessionUser;
@@ -31,6 +33,19 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  function createDocument() {
+    return apiFetch<{ id: string }>("/api/documents", {
+      method: "POST",
+    });
+  }
+
+  const { mutate: handleNewDoc } = useMutation({
+    mutationFn: createDocument,
+    onSuccess: ({ id }) => {
+      router.navigate({ to: `/document/${id}` });
+    },
+  });
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -46,12 +61,10 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
         <SidebarContent>
           <div className="p-4">
-            <Link to="/document/new">
-              <Button className="w-full gap-2">
-                <Plus className="h-4 w-4" />
-                New document
-              </Button>
-            </Link>
+            <Button className="w-full gap-2" onClick={() => handleNewDoc()}>
+              <Plus className="h-4 w-4" />
+              New document
+            </Button>
           </div>
 
           <SidebarMenu>
