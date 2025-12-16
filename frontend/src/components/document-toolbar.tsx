@@ -4,13 +4,14 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  ChevronDown,
   Code,
   ImageIcon,
   Italic,
   Link2,
   List,
   ListOrdered,
-  Palette,
+  PenTool,
   Printer,
   Quote,
   Redo2,
@@ -29,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { fontFamilies } from "@/lib/helpers";
+import { fontFamilies, highlightColors, textColors } from "@/lib/helpers";
 
 export function DocumentToolbar() {
   const { editor } = useCurrentEditor();
@@ -71,6 +72,10 @@ export function DocumentToolbar() {
         fontSize:
           editor.getAttributes("textStyle").fontSize?.replace("px", "") ?? "14",
         fontFamily: editor.getAttributes("textStyle").fontFamily || "",
+
+        textColor: editor.getAttributes("textStyle").color || "#000000",
+        highlightColor:
+          editor.getAttributes("highlight").color || "transparent",
       };
     },
   });
@@ -139,13 +144,24 @@ export function DocumentToolbar() {
       <div className="h-6 w-px shrink-0 bg-border" />
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 px-3">
-            <span className="text-sm">
-              {state?.headingLevel ? `Heading ${state.headingLevel}` : "Normal"}
-            </span>
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-3">
+                <span className="text-sm">
+                  {state?.headingLevel
+                    ? `Heading ${state.headingLevel}`
+                    : "Normal"}
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Heading</p>
+          </TooltipContent>
+        </Tooltip>
+
         <DropdownMenuContent>
           <DropdownMenuItem
             onClick={() => editor?.chain().focus().setParagraph().run()}
@@ -177,14 +193,20 @@ export function DocumentToolbar() {
       </DropdownMenu>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 px-3">
-            <span className="text-sm truncate max-w-[120px]">
-              {fontFamilies.find((f) => f.value === state?.fontFamily)?.label ??
-                "Font"}
-            </span>
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-3">
+                <span className="text-sm truncate max-w-[120px]">
+                  {fontFamilies.find((f) => f.value === state?.fontFamily)
+                    ?.label ?? "Font"}
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Font</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent>
           {fontFamilies.map((font) => (
             <DropdownMenuItem
@@ -205,11 +227,17 @@ export function DocumentToolbar() {
       </DropdownMenu>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 px-3">
-            <span className="text-sm">{state?.fontSize ?? "14"}</span>
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-3">
+                <span className="text-sm">{state?.fontSize ?? "14"}</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Font Size</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent>
           {[
             "8",
@@ -301,12 +329,79 @@ export function DocumentToolbar() {
       </Tooltip>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 px-2">
-            <Palette className="w-4 h-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent></DropdownMenuContent>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-10 px-2 flex flex-col justify-center"
+              >
+                <span className="h-4 w-4 text-sm font-semibold">A</span>
+                <span
+                  className="h-1 w-full rounded"
+                  style={{ backgroundColor: state?.textColor }}
+                />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Text color</TooltipContent>
+        </Tooltip>
+
+        <DropdownMenuContent className="grid grid-cols-6 gap-1 p-2">
+          {textColors.map((color) => (
+            <button
+              key={color}
+              className="h-6 w-6 rounded border cursor-pointer"
+              style={{ backgroundColor: color }}
+              onClick={() => editor?.chain().focus().setColor(color).run()}
+            />
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-10 px-2 flex flex-col justify-center"
+              >
+                <PenTool className="h-4 w-4" />
+                <span
+                  className="h-1 w-full rounded"
+                  style={{
+                    backgroundColor:
+                      state?.highlightColor === "transparent"
+                        ? "white"
+                        : state?.highlightColor,
+                  }}
+                />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Highlight color</TooltipContent>
+        </Tooltip>
+
+        <DropdownMenuContent className="grid grid-cols-6 gap-1 p-2">
+          {highlightColors.map((color) => (
+            <button
+              key={color}
+              className="h-6 w-6 rounded border cursor-pointer"
+              style={{
+                backgroundColor:
+                  color === "transparent" ? "transparent" : color,
+              }}
+              onClick={() =>
+                color === "transparent"
+                  ? editor?.chain().focus().unsetHighlight().run()
+                  : editor?.chain().focus().setHighlight({ color }).run()
+              }
+            />
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
 
       <div className="h-6 w-px shrink-0 bg-border" />

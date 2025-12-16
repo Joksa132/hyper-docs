@@ -63,7 +63,7 @@ function DocumentPage() {
         },
       }),
       Highlight.configure({
-        multicolor: false,
+        multicolor: true,
       }),
       TextStyle,
       Color,
