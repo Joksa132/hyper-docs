@@ -26,7 +26,6 @@ export const documents = pgTable(
     publicToken: text("public_token").unique(),
 
     trashedAt: timestamp("trashed_at"),
-    deletedAt: timestamp("deleted_at"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

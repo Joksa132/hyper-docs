@@ -19,7 +19,6 @@ export type Document = {
   isPublic: boolean;
   publicToken: string | null;
   trashedAt: string | null;
-  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   isStarred: boolean;
