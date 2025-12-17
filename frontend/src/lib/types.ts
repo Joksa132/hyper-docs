@@ -22,6 +22,7 @@ export type Document = {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  isStarred: boolean;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved";
