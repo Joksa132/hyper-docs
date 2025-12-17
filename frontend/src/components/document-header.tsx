@@ -59,6 +59,26 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
   const status =
     queryClient.getQueryData<SaveStatus>(["save-status", documentId]) ?? "idle";
 
+  const toggleStar = async () => {
+    return apiFetch(`/api/documents/${documentId}/star`, {
+      method: doc?.isStarred ? "DELETE" : "POST",
+    });
+  };
+
+  const starMutation = useMutation({
+    mutationFn: toggleStar,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["document", documentId] });
+
+      queryClient.setQueryData<Document>(["document", documentId], (old) =>
+        old ? { ...old, isStarred: !old.isStarred } : old
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
+
   return (
     <header className="h-14 flex justify-between items-center border-b border-border px-4">
       <div className="flex items-center gap-3">
@@ -73,8 +93,12 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
           className="h-8 w-40 border-none bg-transparent text-sm font-medium"
         />
 
-        <Button variant="ghost" size="sm">
-          <Star className="h-4 w-4" />
+        <Button variant="ghost" size="sm" onClick={() => starMutation.mutate()}>
+          <Star
+            className={`h-4 w-4 ${
+              doc?.isStarred && "fill-primary text-primary"
+            }`}
+          />
         </Button>
 
         {status === "saving" && (
