@@ -57,9 +57,26 @@ function DocumentPage() {
         },
       }),
       TiptapLink.configure({
+        autolink: true,
+        linkOnPaste: true,
         openOnClick: false,
+        enableClickSelection: true,
+        defaultProtocol: "https",
         HTMLAttributes: {
           class: "text-blue-500 underline cursor-pointer",
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        isAllowedUri: (url, ctx) => {
+          if (!ctx.defaultValidate(url)) return false;
+
+          if (url.startsWith("javascript:")) return false;
+          if (url.startsWith("./") || url.startsWith("/")) return false;
+
+          return true;
+        },
+        shouldAutoLink: (url) => {
+          return url.startsWith("https://") || url.startsWith("http://");
         },
       }),
       Highlight.configure({
