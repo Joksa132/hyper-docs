@@ -54,7 +54,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     <div className="flex min-h-screen bg-background">
       <Sidebar>
         <SidebarHeader>
-          <div className="h-16 flex items-center gap-2 border-b border-border px-6">
+          <div className="h-16 flex items-center gap-2 px-6">
             <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary">
               <FileText className="h-4 w-4 text-primary-foreground" />
             </div>

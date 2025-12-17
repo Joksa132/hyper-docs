@@ -6,10 +6,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/starred")({
-  component: RouteComponent,
+  component: StarredDocuments,
 });
 
-function RouteComponent() {
+function StarredDocuments() {
   const { data, isLoading } = useQuery<Document[]>({
     queryKey: ["documents"],
     queryFn: () => apiFetch("/api/documents"),
