@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { Button } from "./ui/button";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +27,8 @@ type DashboardSidebarProps = {
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const router = useRouter();
+  const matchRoute = useMatchRoute();
+
   const userInitials = user.name
     .split(" ")
     .map((part) => part[0])
@@ -54,12 +56,12 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     <div className="flex min-h-screen bg-background">
       <Sidebar>
         <SidebarHeader>
-          <div className="h-16 flex items-center gap-2 px-6">
+          <Link to="/dashboard" className="h-16 flex items-center gap-2 px-6">
             <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary">
               <FileText className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-lg font-semibold">HyperDocs</span>
-          </div>
+          </Link>
         </SidebarHeader>
 
         <SidebarContent>
@@ -72,7 +74,10 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
+              <SidebarMenuButton
+                asChild
+                isActive={!!matchRoute({ to: "/dashboard", fuzzy: false })}
+              >
                 <Link to="/dashboard">
                   <FileText className="h-4 w-4" />
                   <span>All documents</span>
@@ -81,7 +86,12 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                isActive={
+                  !!matchRoute({ to: "/dashboard/starred", fuzzy: true })
+                }
+              >
                 <Link to="/dashboard/starred">
                   <Star className="h-4 w-4" />
                   <span>Starred</span>
@@ -90,7 +100,12 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                isActive={
+                  !!matchRoute({ to: "/dashboard/shared", fuzzy: true })
+                }
+              >
                 <Link to="/dashboard/shared">
                   <Users className="h-4 w-4" />
                   <span>Shared with me</span>
@@ -99,7 +114,10 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                isActive={!!matchRoute({ to: "/dashboard/trash", fuzzy: true })}
+              >
                 <Link to="/dashboard/trash">
                   <Trash2 className="h-4 w-4" />
                   <span>Trash</span>
