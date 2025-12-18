@@ -1,4 +1,5 @@
 import { DocumentCard } from "@/components/document-card";
+import { LoadingPage } from "@/components/loading-page";
 import { apiFetch } from "@/lib/api";
 import type { Document } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,7 @@ function DashboardPage() {
   const recentDocuments = sortedDocuments?.slice(0, 8);
 
   if (isLoading) {
-    return <div className="p-6">Loading…</div>;
+    return <LoadingPage label="Loading documents..." />;
   }
 
   return (

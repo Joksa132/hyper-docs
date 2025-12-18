@@ -1,4 +1,5 @@
 import { DocumentCard } from "@/components/document-card";
+import { LoadingPage } from "@/components/loading-page";
 import { apiFetch } from "@/lib/api";
 import type { Document } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +22,7 @@ function StarredDocuments() {
       .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)) ?? [];
 
   if (isLoading) {
-    return <div className="p-6">Loading…</div>;
+    return <LoadingPage label="Loading starred documents..." />;
   }
 
   return (

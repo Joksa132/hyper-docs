@@ -1,4 +1,5 @@
 import { DocumentCard } from "@/components/document-card";
+import { LoadingPage } from "@/components/loading-page";
 import { apiFetch } from "@/lib/api";
 import type { Document } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +16,9 @@ function TrashDocuments() {
     queryFn: () => apiFetch("/api/documents/trash"),
   });
 
-  if (isLoading) return <div className="p-6">Loading…</div>;
+  if (isLoading) {
+    return <LoadingPage label="Loading documents from trash" />;
+  }
 
   return (
     <div className="p-6 w-full flex flex-col gap-10">

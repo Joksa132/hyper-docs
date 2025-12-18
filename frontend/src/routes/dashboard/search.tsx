@@ -1,4 +1,5 @@
 import { DocumentCard } from "@/components/document-card";
+import { LoadingPage } from "@/components/loading-page";
 import { apiFetch } from "@/lib/api";
 import type { Document } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ function SearchPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6">Searching…</div>;
+    return <LoadingPage label="Searching for documents..." />;
   }
 
   return (
