@@ -3,12 +3,27 @@ import { db } from "../db/client";
 import { documents, documentStars } from "../db/schema";
 import { getUser } from "../lib/get-user";
 import { nanoid } from "nanoid";
-import { and, eq, getTableColumns, isNotNull, isNull, desc } from "drizzle-orm";
+import {
+  and,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  desc,
+  ilike,
+} from "drizzle-orm";
 
 export const documentsRoute = new Hono();
 
 documentsRoute.get("/", async (c) => {
   const user = await getUser(c.req.raw);
+  const search = c.req.query("search");
+
+  const where = and(
+    eq(documents.ownerId, user.id),
+    isNull(documents.trashedAt),
+    search ? ilike(documents.title, `%${search}%`) : undefined
+  );
 
   const docs = await db
     .select({
@@ -26,8 +41,8 @@ documentsRoute.get("/", async (c) => {
         eq(documentStars.userId, user.id)
       )
     )
-    .where(and(eq(documents.ownerId, user.id), isNull(documents.trashedAt)))
-    .orderBy(documents.updatedAt);
+    .where(where)
+    .orderBy(desc(documents.updatedAt));
 
   return c.json(
     docs.map((d) => ({
