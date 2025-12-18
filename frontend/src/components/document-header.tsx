@@ -17,6 +17,8 @@ import { apiFetch } from "@/lib/api";
 import type { Document, SaveStatus } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
+import { Tooltip } from "@radix-ui/react-tooltip";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 type DocumentHeaderProps = {
   documentId: string;
@@ -80,74 +82,91 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
   });
 
   return (
-    <header className="h-14 flex justify-between items-center border-b border-border px-4">
-      <div className="flex items-center gap-3">
-        <Link to="/dashboard">
-          <div className="h-8 w-8 flex justify-center items-center rounded bg-primary">
-            <FileText className="h-5 w-5 text-primary-foreground" />
-          </div>
-        </Link>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="h-8 w-40 border-none bg-transparent text-sm font-medium"
-        />
-
-        <Button variant="ghost" size="sm" onClick={() => starMutation.mutate()}>
-          <Star
-            className={`h-4 w-4 ${
-              doc?.isStarred && "fill-primary text-primary"
-            }`}
+    <TooltipProvider>
+      <header className="h-14 flex justify-between items-center border-b border-border px-4">
+        <div className="flex items-center gap-3">
+          <Link to="/dashboard">
+            <div className="h-8 w-8 flex justify-center items-center rounded bg-primary">
+              <FileText className="h-5 w-5 text-primary-foreground" />
+            </div>
+          </Link>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="h-8 w-40 border-none bg-transparent text-sm font-medium"
           />
-        </Button>
 
-        {status === "saving" && (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Saving…
-          </span>
-        )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => starMutation.mutate()}
+                className="group hover:bg-primary hover:text-primary-foreground"
+              >
+                <Star
+                  className={`h-4 w-4 ${
+                    doc?.isStarred
+                      ? "fill-primary text-primary group-hover:fill-primary-foreground group-hover:text-primary-foreground"
+                      : "group-hover:text-primary-foreground"
+                  }`}
+                />
+              </Button>
+            </TooltipTrigger>
 
-        {status === "saved" && (
-          <span className="text-xs text-primary flex items-center gap-1">
-            <Check className="h-4 w-4" />
-            Saved
-          </span>
-        )}
-      </div>
+            <TooltipContent>
+              {doc?.isStarred ? "Unstar document" : "Star document"}
+            </TooltipContent>
+          </Tooltip>
 
-      <div className="flex items-center gap-2">
-        <div>Presence avatars</div>
+          {status === "saving" && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Saving…
+            </span>
+          )}
 
-        <div className="h-6 w-px mx-1 shrink-0 bg-border" />
+          {status === "saved" && (
+            <span className="text-xs text-primary flex items-center gap-1">
+              <Check className="h-4 w-4" />
+              Saved
+            </span>
+          )}
+        </div>
 
-        <Button variant="ghost" size="sm" className="bg-muted">
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Comments
-        </Button>
+        <div className="flex items-center gap-2">
+          <div>Presence avatars</div>
 
-        <Button variant="ghost" size="sm" className="bg-muted">
-          <Clock className="mr-2 h-4 w-4" />
-          History
-        </Button>
+          <div className="h-6 w-px mx-1 shrink-0 bg-border" />
 
-        <Button variant="ghost" size="sm" className="bg-muted">
-          <Sparkles className="mr-2 h-4 w-4" />
-          AI
-        </Button>
+          <Button variant="ghost" size="sm" className="bg-muted">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Comments
+          </Button>
 
-        <div className="h-6 w-px mx-1 shrink-0 bg-border" />
+          <Button variant="ghost" size="sm" className="bg-muted">
+            <Clock className="mr-2 h-4 w-4" />
+            History
+          </Button>
 
-        <Button variant="outline" size="sm">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Invite
-        </Button>
+          <Button variant="ghost" size="sm" className="bg-muted">
+            <Sparkles className="mr-2 h-4 w-4" />
+            AI
+          </Button>
 
-        <Button size="sm">
-          <Share2 className="mr-2 h-4 w-4" />
-          Share
-        </Button>
-      </div>
-    </header>
+          <div className="h-6 w-px mx-1 shrink-0 bg-border" />
+
+          <Button variant="outline" size="sm">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Invite
+          </Button>
+
+          <Button size="sm">
+            <Share2 className="mr-2 h-4 w-4" />
+            Share
+          </Button>
+        </div>
+      </header>
+    </TooltipProvider>
   );
 }
