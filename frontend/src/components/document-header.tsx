@@ -19,6 +19,8 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Dialog, DialogContent } from "./ui/dialog";
+import { ShareModal } from "./share-modal";
 
 type DocumentHeaderProps = {
   documentId: string;
@@ -32,6 +34,8 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
   const [title, setTitle] = useState(() => doc?.title ?? "");
 
   const debouncedTitle = useDebounce(title, 1000);
+
+  const [shareOpen, setShareOpen] = useState(false);
 
   const updateDocument = async (data: { title?: string }) => {
     return apiFetch<Document>(`/api/documents/${documentId}`, {
@@ -161,12 +165,26 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
             Invite
           </Button>
 
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShareOpen(true)}>
             <Share2 className="mr-2 h-4 w-4" />
             Share
           </Button>
         </div>
       </header>
+
+      {shareOpen && (
+        <Dialog open onOpenChange={setShareOpen}>
+          <DialogContent>
+            <ShareModal
+              documentId={documentId}
+              documentName={title}
+              isPublic={doc?.isPublic}
+              publicToken={doc?.publicToken}
+              onClose={() => setShareOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </TooltipProvider>
   );
 }
