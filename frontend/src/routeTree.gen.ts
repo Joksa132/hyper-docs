@@ -14,6 +14,7 @@ import { Route as DocumentRouteImport } from './routes/document'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as PublicTokenRouteImport } from './routes/public/$token'
 import { Route as DocumentIdRouteImport } from './routes/document/$id'
 import { Route as DashboardTrashRouteImport } from './routes/dashboard/trash'
 import { Route as DashboardStarredRouteImport } from './routes/dashboard/starred'
@@ -44,6 +45,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const PublicTokenRoute = PublicTokenRouteImport.update({
+  id: '/public/$token',
+  path: '/public/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentIdRoute = DocumentIdRouteImport.update({
   id: '/$id',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
   '/document/$id': typeof DocumentIdRoute
+  '/public/$token': typeof PublicTokenRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
   '/document/$id': typeof DocumentIdRoute
+  '/public/$token': typeof PublicTokenRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/dashboard/starred': typeof DashboardStarredRoute
   '/dashboard/trash': typeof DashboardTrashRoute
   '/document/$id': typeof DocumentIdRoute
+  '/public/$token': typeof PublicTokenRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/dashboard/starred'
     | '/dashboard/trash'
     | '/document/$id'
+    | '/public/$token'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/dashboard/starred'
     | '/dashboard/trash'
     | '/document/$id'
+    | '/public/$token'
     | '/dashboard'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/dashboard/starred'
     | '/dashboard/trash'
     | '/document/$id'
+    | '/public/$token'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -150,6 +162,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   DocumentRoute: typeof DocumentRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PublicTokenRoute: typeof PublicTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/public/$token': {
+      id: '/public/$token'
+      path: '/public/$token'
+      fullPath: '/public/$token'
+      preLoaderRoute: typeof PublicTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/document/$id': {
       id: '/document/$id'
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   DocumentRoute: DocumentRouteWithChildren,
   LoginRoute: LoginRoute,
+  PublicTokenRoute: PublicTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
