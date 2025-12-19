@@ -1,0 +1,1 @@
+ALTER TABLE "document_members" ADD COLUMN "role" text NOT NULL;
