@@ -2,7 +2,7 @@ import { LoadingPage } from "@/components/loading-page";
 import { apiFetch } from "@/lib/api";
 import type { Document } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline_ from "@tiptap/extension-underline";
@@ -14,6 +14,7 @@ import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import FontFamily from "@tiptap/extension-font-family";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/public/$token")({
   component: PublicDocumentPage,
@@ -84,6 +85,16 @@ function PublicDocumentPage() {
       <h1 className="mb-4 text-2xl font-semibold">{data.title}</h1>
       <div className="bg-white w-full max-w-[850px] shadow-md rounded-sm">
         <EditorContent editor={editor} />
+      </div>
+
+      <div className="mt-10 border-t border-border bg-background px-6 py-6 text-center">
+        <p className="text-sm text-muted-foreground mb-3">
+          Want to create or edit documents?
+        </p>
+
+        <Link to="/login">
+          <Button>Sign in to HyperDocs</Button>
+        </Link>
       </div>
     </div>
   );
