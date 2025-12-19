@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleIcon } from "@/components/ui/provider-icons";
 import { authClient } from "@/lib/auth-client";
 import {
   createFileRoute,
@@ -8,7 +9,7 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
+import { Facebook, FileText, Github } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
@@ -88,7 +89,7 @@ function LoginPage() {
           <div className="flex flex-col gap-4">
             <Button
               variant="outline"
-              className="w-full bg-transparent font-medium hover:border-primary/50"
+              className="w-full flex items-center gap-2 bg-transparent font-medium hover:border-primary/50"
               onClick={async () => {
                 await authClient.signIn.social({
                   provider: "google",
@@ -96,12 +97,13 @@ function LoginPage() {
                 });
               }}
             >
+              <GoogleIcon className="h-4 w-4" />
               Continue with Google
             </Button>
 
             <Button
               variant="outline"
-              className="w-full bg-transparent font-medium hover:border-primary/50"
+              className="w-full flex items-center gap-2 bg-transparent font-medium hover:border-primary/50"
               onClick={async () => {
                 await authClient.signIn.social({
                   provider: "github",
@@ -109,7 +111,22 @@ function LoginPage() {
                 });
               }}
             >
+              <Github className="h-4 w-4" />
               Continue with GitHub
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full flex items-center gap-2 bg-transparent font-medium hover:border-primary/50"
+              onClick={async () => {
+                await authClient.signIn.social({
+                  provider: "facebook",
+                  callbackURL: `${window.location.origin}/`,
+                });
+              }}
+            >
+              <Facebook className="h-4 w-4" />
+              Continue with Facebook
             </Button>
           </div>
 
