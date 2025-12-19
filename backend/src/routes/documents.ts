@@ -140,6 +140,38 @@ documentsRoute.post("/:id/restore", async (c) => {
   return c.json({ restored: true });
 });
 
+documentsRoute.post("/:id/share", async (c) => {
+  const user = await getUser(c.req.raw);
+  const id = c.req.param("id");
+
+  const token = nanoid(32);
+
+  await db
+    .update(documents)
+    .set({
+      isPublic: true,
+      publicToken: token,
+    })
+    .where(and(eq(documents.id, id), eq(documents.ownerId, user.id)));
+
+  return c.json({ token });
+});
+
+documentsRoute.post("/:id/unshare", async (c) => {
+  const user = await getUser(c.req.raw);
+  const id = c.req.param("id");
+
+  await db
+    .update(documents)
+    .set({
+      isPublic: false,
+      publicToken: null,
+    })
+    .where(and(eq(documents.id, id), eq(documents.ownerId, user.id)));
+
+  return c.json({ success: true });
+});
+
 documentsRoute.get("/:id", async (c) => {
   const user = await getUser(c.req.raw);
   const id = c.req.param("id");

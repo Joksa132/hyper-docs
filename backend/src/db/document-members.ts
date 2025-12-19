@@ -13,6 +13,8 @@ export const documentMembers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
+    role: text("role").notNull().$type<"viewer" | "editor">(),
+
     invitedById: text("invited_by_id").references(() => users.id, {
       onDelete: "set null",
     }),
