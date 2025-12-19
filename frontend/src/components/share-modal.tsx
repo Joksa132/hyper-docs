@@ -109,13 +109,18 @@ export function ShareModal({
                 size="sm"
                 className="text-destructive"
                 onClick={() => unshareMutation.mutate()}
+                disabled={unshareMutation.isPending}
               >
                 Disable link
               </Button>
             </div>
           </div>
         ) : (
-          <Button className="w-full" onClick={() => shareMutation.mutate()}>
+          <Button
+            className="w-full"
+            onClick={() => shareMutation.mutate()}
+            disabled={shareMutation.isPending}
+          >
             Enable public link
           </Button>
         )}
