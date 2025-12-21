@@ -23,6 +23,8 @@ export type Document = {
   updatedAt: string;
   isStarred: boolean;
   role: "viewer" | "editor";
+  ownerName?: string;
+  isOwner: boolean;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved";
