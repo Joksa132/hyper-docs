@@ -22,6 +22,14 @@ export type Document = {
   createdAt: string;
   updatedAt: string;
   isStarred: boolean;
+  role: "viewer" | "editor";
 };
 
 export type SaveStatus = "idle" | "saving" | "saved";
+
+export type Member = {
+  userId: string;
+  email: string;
+  name: string;
+  role: "viewer" | "editor";
+};
