@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../db/client";
-import { documents, documentStars } from "../db/schema";
+import { documentMembers, documents, documentStars, users } from "../db/schema";
 import { getUser } from "../lib/get-user";
 import { nanoid } from "nanoid";
 import {
@@ -12,6 +12,7 @@ import {
   desc,
   ilike,
 } from "drizzle-orm";
+import { getDocumentAccess } from "../lib/document-permissions";
 
 export const documentsRoute = new Hono();
 
@@ -172,6 +173,44 @@ documentsRoute.post("/:id/unshare", async (c) => {
   return c.json({ success: true });
 });
 
+documentsRoute.post("/:id/invite", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+  const { email, role } = await c.req.json();
+
+  if (!email || !["viewer", "editor"].includes(role)) {
+    return c.json({ error: "Invalid payload" }, 400);
+  }
+
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const invitedUser = await db.query.users.findFirst({
+    where: (u, { eq }) => eq(u.email, email),
+  });
+
+  if (!invitedUser) {
+    return c.json({ error: "User not found" }, 404);
+  }
+
+  await db
+    .insert(documentMembers)
+    .values({
+      documentId,
+      userId: invitedUser.id,
+      role,
+      invitedById: user.id,
+    })
+    .onConflictDoNothing();
+
+  return c.json({ success: true });
+});
+
 documentsRoute.get("/:id", async (c) => {
   const user = await getUser(c.req.raw);
   const id = c.req.param("id");
@@ -192,15 +231,43 @@ documentsRoute.get("/:id", async (c) => {
     .where(eq(documents.id, id))
     .then((r) => r[0]);
 
-  if (!doc) return c.notFound();
-  if (doc.ownerId !== user.id) {
+  const access = await getDocumentAccess(id, user.id);
+
+  if (!access) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
   return c.json({
     ...doc,
     isStarred: Boolean(doc.isStarred),
+    role: access.role,
   });
+});
+
+documentsRoute.get("/:id/members", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const members = await db
+    .select({
+      userId: documentMembers.userId,
+      role: documentMembers.role,
+      email: users.email,
+      name: users.name,
+    })
+    .from(documentMembers)
+    .innerJoin(users, eq(users.id, documentMembers.userId))
+    .where(eq(documentMembers.documentId, documentId));
+
+  return c.json(members);
 });
 
 documentsRoute.patch("/:id", async (c) => {
@@ -212,7 +279,13 @@ documentsRoute.patch("/:id", async (c) => {
     where: (d, { eq }) => eq(d.id, id),
   });
 
-  if (!doc || doc.ownerId !== user.id) {
+  if (!doc) {
+    return c.json({ error: "Document not found" }, 404);
+  }
+
+  const access = await getDocumentAccess(id, user.id);
+
+  if (!access || access.role !== "editor") {
     return c.json({ error: "Forbidden" }, 403);
   }
 
@@ -243,4 +316,29 @@ documentsRoute.delete("/:id", async (c) => {
   await db.delete(documents).where(eq(documents.id, id));
 
   return c.json({ deleted: true });
+});
+
+documentsRoute.delete("/:id/members/:userId", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+  const memberId = c.req.param("userId");
+
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  await db
+    .delete(documentMembers)
+    .where(
+      and(
+        eq(documentMembers.documentId, documentId),
+        eq(documentMembers.userId, memberId)
+      )
+    );
+
+  return c.json({ success: true });
 });
