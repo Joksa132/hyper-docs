@@ -55,6 +55,25 @@ export function InviteModal({ documentId, onClose }: InviteModalProps) {
     },
   });
 
+  const updateRole = useMutation({
+    mutationFn: ({
+      userId,
+      role,
+    }: {
+      userId: string;
+      role: "viewer" | "editor";
+    }) =>
+      apiFetch(`/api/documents/${documentId}/members/${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["document-members", documentId],
+      });
+    },
+  });
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Invite people</h2>
@@ -79,7 +98,10 @@ export function InviteModal({ documentId, onClose }: InviteModalProps) {
           </SelectContent>
         </Select>
 
-        <Button onClick={() => invite.mutate()} disabled={!email}>
+        <Button
+          onClick={() => invite.mutate()}
+          disabled={!email || invite.isPending}
+        >
           <UserPlus className="h-4 w-4 mr-2" />
           Invite
         </Button>
@@ -97,10 +119,29 @@ export function InviteModal({ documentId, onClose }: InviteModalProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs capitalize">{m.role}</span>
+              <Select
+                value={m.role}
+                disabled={updateRole.isPending}
+                onValueChange={(value) =>
+                  updateRole.mutate({
+                    userId: m.userId,
+                    role: value as "viewer" | "editor",
+                  })
+                }
+              >
+                <SelectTrigger className="w-[110px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button
                 variant="ghost"
                 size="icon"
+                disabled={remove.isPending}
                 onClick={() => remove.mutate(m.userId)}
               >
                 <X className="h-4 w-4" />
