@@ -108,28 +108,30 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
             </span>
           )}
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => starMutation.mutate()}
-                className="group hover:bg-primary hover:text-primary-foreground"
-              >
-                <Star
-                  className={`h-4 w-4 ${
-                    doc?.isStarred
-                      ? "fill-primary text-primary group-hover:fill-primary-foreground group-hover:text-primary-foreground"
-                      : "group-hover:text-primary-foreground"
-                  }`}
-                />
-              </Button>
-            </TooltipTrigger>
+          {doc?.isOwner && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => starMutation.mutate()}
+                  className="group hover:bg-primary hover:text-primary-foreground"
+                >
+                  <Star
+                    className={`h-4 w-4 ${
+                      doc.isStarred
+                        ? "fill-primary text-primary group-hover:fill-primary-foreground group-hover:text-primary-foreground"
+                        : "group-hover:text-primary-foreground"
+                    }`}
+                  />
+                </Button>
+              </TooltipTrigger>
 
-            <TooltipContent>
-              {doc?.isStarred ? "Unstar document" : "Star document"}
-            </TooltipContent>
-          </Tooltip>
+              <TooltipContent>
+                {doc.isStarred ? "Unstar document" : "Star document"}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           {status === "saving" && (
             <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -184,7 +186,7 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
         </div>
       </header>
 
-      {inviteOpen && (
+      {doc?.isOwner && inviteOpen && (
         <Dialog open onOpenChange={setInviteOpen}>
           <DialogContent>
             <InviteModal
@@ -194,7 +196,7 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
           </DialogContent>
         </Dialog>
       )}
-      {shareOpen && (
+      {doc?.isOwner && shareOpen && (
         <Dialog open onOpenChange={setShareOpen}>
           <DialogContent>
             <ShareModal

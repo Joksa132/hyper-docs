@@ -106,7 +106,7 @@ function CardContent({
         </div>
 
         <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          {variant === "default" && (
+          {variant === "default" && !doc.isOwner && (
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -204,6 +204,11 @@ function CardContent({
         <p className="truncate font-medium text-lg">
           {doc.title || "Untitled document"}
         </p>
+        {doc.ownerName && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Shared by {doc.ownerName}
+          </p>
+        )}
         <p className="mt-1 text-xs text-muted-foreground">
           {variant === "trash"
             ? "In trash"

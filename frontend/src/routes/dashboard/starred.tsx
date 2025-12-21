@@ -12,8 +12,8 @@ export const Route = createFileRoute("/dashboard/starred")({
 
 function StarredDocuments() {
   const { data, isLoading } = useQuery<Document[]>({
-    queryKey: ["documents"],
-    queryFn: () => apiFetch("/api/documents"),
+    queryKey: ["documents", "starred"],
+    queryFn: () => apiFetch("/api/documents/starred"),
   });
 
   const starredDocs =
