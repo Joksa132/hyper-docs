@@ -89,8 +89,10 @@ function DocumentPage() {
     ],
     immediatelyRender: false,
     onUpdate({ editor }) {
+      if (doc?.role !== "editor") return;
       setContent(editor.getJSON());
     },
+    editable: doc?.role === "editor",
   });
 
   useEffect(() => {
@@ -122,6 +124,7 @@ function DocumentPage() {
   useEffect(() => {
     if (!debouncedContent) return;
     if (!doc) return;
+    if (doc.role !== "editor") return;
 
     saveMutation.mutate(debouncedContent);
   }, [debouncedContent]);
@@ -133,7 +136,7 @@ function DocumentPage() {
       <div className="flex flex-1 flex-col">
         <DocumentHeader key={id} documentId={id} />
 
-        <DocumentToolbar />
+        {doc.role === "editor" && <DocumentToolbar />}
 
         <DocumentEditor />
       </div>

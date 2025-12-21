@@ -21,6 +21,7 @@ import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { ShareModal } from "./share-modal";
+import { InviteModal } from "./invite-modal";
 
 type DocumentHeaderProps = {
   documentId: string;
@@ -35,7 +36,8 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
 
   const debouncedTitle = useDebounce(title, 1000);
 
-  const [shareOpen, setShareOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState<boolean>(false);
+  const [inviteOpen, setInviteOpen] = useState<boolean>(false);
 
   const updateDocument = async (data: { title?: string }) => {
     return apiFetch<Document>(`/api/documents/${documentId}`, {
@@ -100,6 +102,12 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
             className="h-8 w-40 border-none bg-transparent text-sm font-medium"
           />
 
+          {doc?.role === "viewer" && (
+            <span className="ml-2 rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              View only
+            </span>
+          )}
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -160,7 +168,11 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
 
           <div className="h-6 w-px mx-1 shrink-0 bg-border" />
 
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setInviteOpen(true)}
+          >
             <UserPlus className="mr-2 h-4 w-4" />
             Invite
           </Button>
@@ -172,6 +184,16 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
         </div>
       </header>
 
+      {inviteOpen && (
+        <Dialog open onOpenChange={setInviteOpen}>
+          <DialogContent>
+            <InviteModal
+              documentId={documentId}
+              onClose={() => setInviteOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
       {shareOpen && (
         <Dialog open onOpenChange={setShareOpen}>
           <DialogContent>
