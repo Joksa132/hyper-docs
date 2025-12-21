@@ -70,6 +70,49 @@ documentsRoute.get("/trash", async (c) => {
   return c.json(docs);
 });
 
+documentsRoute.get("/shared", async (c) => {
+  const user = await getUser(c.req.raw);
+
+  const docs = await db
+    .select({
+      id: documents.id,
+      title: documents.title,
+      updatedAt: documents.updatedAt,
+      createdAt: documents.createdAt,
+      ownerName: users.name,
+    })
+    .from(documentMembers)
+    .innerJoin(documents, eq(documents.id, documentMembers.documentId))
+    .innerJoin(users, eq(users.id, documents.ownerId))
+    .where(
+      and(eq(documentMembers.userId, user.id), isNull(documents.trashedAt))
+    )
+    .orderBy(desc(documents.updatedAt));
+
+  return c.json(docs);
+});
+
+documentsRoute.get("/starred", async (c) => {
+  const user = await getUser(c.req.raw);
+
+  const docs = await db
+    .select({
+      ...getTableColumns(documents),
+      isStarred: documentStars.id,
+    })
+    .from(documentStars)
+    .innerJoin(documents, eq(documents.id, documentStars.documentId))
+    .where(and(eq(documentStars.userId, user.id), isNull(documents.trashedAt)))
+    .orderBy(desc(documents.updatedAt));
+
+  return c.json(
+    docs.map((d) => ({
+      ...d,
+      isStarred: true,
+    }))
+  );
+});
+
 documentsRoute.post("/", async (c) => {
   const user = await getUser(c.req.raw);
 
@@ -89,6 +132,14 @@ documentsRoute.post("/:id/star", async (c) => {
   const user = await getUser(c.req.raw);
   const documentId = c.req.param("id");
 
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
   await db
     .insert(documentStars)
     .values({
@@ -104,6 +155,14 @@ documentsRoute.post("/:id/star", async (c) => {
 documentsRoute.delete("/:id/star", async (c) => {
   const user = await getUser(c.req.raw);
   const documentId = c.req.param("id");
+
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
 
   await db
     .delete(documentStars)
@@ -241,6 +300,7 @@ documentsRoute.get("/:id", async (c) => {
     ...doc,
     isStarred: Boolean(doc.isStarred),
     role: access.role,
+    isOwner: access.isOwner,
   });
 });
 
@@ -268,6 +328,37 @@ documentsRoute.get("/:id/members", async (c) => {
     .where(eq(documentMembers.documentId, documentId));
 
   return c.json(members);
+});
+
+documentsRoute.patch("/:id/members/:userId", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+  const memberId = c.req.param("userId");
+  const { role } = await c.req.json();
+
+  if (!["viewer", "editor"].includes(role)) {
+    return c.json({ error: "Invalid role" }, 400);
+  }
+
+  const doc = await db.query.documents.findFirst({
+    where: (d, { eq }) => eq(d.id, documentId),
+  });
+
+  if (!doc || doc.ownerId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  await db
+    .update(documentMembers)
+    .set({ role })
+    .where(
+      and(
+        eq(documentMembers.documentId, documentId),
+        eq(documentMembers.userId, memberId)
+      )
+    );
+
+  return c.json({ success: true });
 });
 
 documentsRoute.patch("/:id", async (c) => {
