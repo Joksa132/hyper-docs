@@ -17,6 +17,7 @@ import { DocumentEditor } from "@/components/document-editor";
 import { useEffect, useMemo, useState } from "react";
 import type { Document } from "@/lib/types";
 import { useDebounce } from "@uidotdev/usehooks";
+import { CommentsSidebar } from "@/components/comments-sidebar";
 
 export const Route = createFileRoute("/document/$id")({
   component: DocumentPage,
@@ -26,6 +27,7 @@ function DocumentPage() {
   const { id } = Route.useParams();
 
   const [content, setContent] = useState<JSONContent | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
   const debouncedContent = useDebounce(content, 3000);
 
@@ -134,11 +136,23 @@ function DocumentPage() {
   return (
     <EditorContext.Provider value={providerValue}>
       <div className="flex flex-1 flex-col">
-        <DocumentHeader key={id} documentId={id} />
+        <DocumentHeader
+          key={id}
+          documentId={id}
+          setCommentsOpen={setCommentsOpen}
+        />
 
         {doc.role === "editor" && <DocumentToolbar />}
 
         <DocumentEditor />
+
+        {commentsOpen && (
+          <CommentsSidebar
+            documentId={id}
+            canComment={doc.role === "editor"}
+            onClose={() => setCommentsOpen(false)}
+          />
+        )}
       </div>
     </EditorContext.Provider>
   );

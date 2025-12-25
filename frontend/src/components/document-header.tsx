@@ -25,9 +25,13 @@ import { InviteModal } from "./invite-modal";
 
 type DocumentHeaderProps = {
   documentId: string;
+  setCommentsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function DocumentHeader({ documentId }: DocumentHeaderProps) {
+export function DocumentHeader({
+  documentId,
+  setCommentsOpen,
+}: DocumentHeaderProps) {
   const queryClient = useQueryClient();
 
   const doc = queryClient.getQueryData<Document>(["document", documentId]);
@@ -153,7 +157,12 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
 
           <div className="h-6 w-px mx-1 shrink-0 bg-border" />
 
-          <Button variant="ghost" size="sm" className="bg-muted">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-muted"
+            onClick={() => setCommentsOpen((prev) => !prev)}
+          >
             <MessageSquare className="mr-2 h-4 w-4" />
             Comments
           </Button>
