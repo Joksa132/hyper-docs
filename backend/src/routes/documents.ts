@@ -1,6 +1,12 @@
 import { Hono } from "hono";
 import { db } from "../db/client";
-import { documentMembers, documents, documentStars, users } from "../db/schema";
+import {
+  documentComments,
+  documentMembers,
+  documents,
+  documentStars,
+  users,
+} from "../db/schema";
 import { getUser } from "../lib/get-user";
 import { nanoid } from "nanoid";
 import {
@@ -430,6 +436,53 @@ documentsRoute.delete("/:id/members/:userId", async (c) => {
         eq(documentMembers.userId, memberId)
       )
     );
+
+  return c.json({ success: true });
+});
+
+documentsRoute.get("/:id/comments", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+
+  const access = await getDocumentAccess(documentId, user.id);
+  if (!access) return c.json({ error: "Forbidden" }, 403);
+
+  const comments = await db
+    .select({
+      id: documentComments.id,
+      content: documentComments.content,
+      createdAt: documentComments.createdAt,
+      authorId: users.id,
+      authorName: users.name,
+    })
+    .from(documentComments)
+    .innerJoin(users, eq(users.id, documentComments.authorId))
+    .where(eq(documentComments.documentId, documentId))
+    .orderBy(desc(documentComments.createdAt));
+
+  return c.json(comments);
+});
+
+documentsRoute.post("/:id/comments", async (c) => {
+  const user = await getUser(c.req.raw);
+  const documentId = c.req.param("id");
+  const { content } = await c.req.json();
+
+  if (!content?.trim()) {
+    return c.json({ error: "Empty comment" }, 400);
+  }
+
+  const access = await getDocumentAccess(documentId, user.id);
+  if (!access || access.role !== "editor") {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  await db.insert(documentComments).values({
+    id: nanoid(),
+    documentId,
+    authorId: user.id,
+    content,
+  });
 
   return c.json({ success: true });
 });
