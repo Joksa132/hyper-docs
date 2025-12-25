@@ -29,6 +29,13 @@
       "when": 1766142534499,
       "tag": "0003_shocking_madame_masque",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766690580139,
+      "tag": "0004_simple_lightspeed",
+      "breakpoints": true
     }
   ]
 }
