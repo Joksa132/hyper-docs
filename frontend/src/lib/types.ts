@@ -35,3 +35,10 @@ export type Member = {
   name: string;
   role: "viewer" | "editor";
 };
+
+export type Comment = {
+  id: string;
+  content: string;
+  authorName: string;
+  createdAt: string;
+};
