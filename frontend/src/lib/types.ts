@@ -25,6 +25,7 @@ export type Document = {
   role: "viewer" | "editor";
   ownerName?: string;
   isOwner: boolean;
+  currentUserId: string;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -39,6 +40,7 @@ export type Member = {
 export type Comment = {
   id: string;
   content: string;
+  authorId: string;
   authorName: string;
   createdAt: string;
 };

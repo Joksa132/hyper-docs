@@ -10,10 +10,12 @@ import { formatRelativeTime } from "@/lib/helpers";
 export function CommentsSidebar({
   documentId,
   canComment,
+  currentUserId,
   onClose,
 }: {
   documentId: string;
   canComment: boolean;
+  currentUserId: string;
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -33,6 +35,28 @@ export function CommentsSidebar({
     onSuccess: () => {
       setContent("");
       queryClient.invalidateQueries({ queryKey: ["comments", documentId] });
+    },
+  });
+
+  const deleteComment = useMutation({
+    mutationFn: (commentId: string) =>
+      apiFetch(`/api/documents/${documentId}/comments/${commentId}`, {
+        method: "DELETE",
+      }),
+
+    onMutate: async (commentId) => {
+      await queryClient.cancelQueries({ queryKey: ["comments", documentId] });
+
+      const previous = queryClient.getQueryData<Comment[]>([
+        "comments",
+        documentId,
+      ]);
+
+      queryClient.setQueryData<Comment[]>(["comments", documentId], (old) =>
+        old?.filter((c) => c.id !== commentId)
+      );
+
+      return { previous };
     },
   });
 
@@ -96,7 +120,7 @@ export function CommentsSidebar({
             comments?.map((c) => (
               <div
                 key={c.id}
-                className="rounded-xl border border-border bg-card p-3"
+                className="group relative rounded-xl border border-border bg-card p-3"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
@@ -108,6 +132,17 @@ export function CommentsSidebar({
                     </p>
                   </div>
                 </div>
+
+                {c.authorId === currentUserId && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={() => deleteComment.mutate(c.id)}
+                  >
+                    <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                )}
 
                 <p className="mt-2 text-sm text-foreground whitespace-pre-wrap wrap-break-word">
                   {c.content}

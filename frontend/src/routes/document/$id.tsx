@@ -150,6 +150,7 @@ function DocumentPage() {
           <CommentsSidebar
             documentId={id}
             canComment={doc.role === "editor"}
+            currentUserId={doc.currentUserId}
             onClose={() => setCommentsOpen(false)}
           />
         )}
