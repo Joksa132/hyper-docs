@@ -17,6 +17,7 @@ import {
   isNull,
   desc,
   ilike,
+  asc,
 } from "drizzle-orm";
 import { getDocumentAccess } from "../lib/document-permissions";
 
@@ -307,6 +308,7 @@ documentsRoute.get("/:id", async (c) => {
     isStarred: Boolean(doc.isStarred),
     role: access.role,
     isOwner: access.isOwner,
+    currentUserId: user.id,
   });
 });
 
@@ -458,7 +460,7 @@ documentsRoute.get("/:id/comments", async (c) => {
     .from(documentComments)
     .innerJoin(users, eq(users.id, documentComments.authorId))
     .where(eq(documentComments.documentId, documentId))
-    .orderBy(desc(documentComments.createdAt));
+    .orderBy(asc(documentComments.createdAt));
 
   return c.json(comments);
 });
@@ -483,6 +485,23 @@ documentsRoute.post("/:id/comments", async (c) => {
     authorId: user.id,
     content,
   });
+
+  return c.json({ success: true });
+});
+
+documentsRoute.delete("/:id/comments/:commentId", async (c) => {
+  const user = await getUser(c.req.raw);
+  const commentId = c.req.param("commentId");
+
+  const comment = await db.query.documentComments.findFirst({
+    where: (cmt, { eq }) => eq(cmt.id, commentId),
+  });
+
+  if (!comment || comment.authorId !== user.id) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  await db.delete(documentComments).where(eq(documentComments.id, commentId));
 
   return c.json({ success: true });
 });
