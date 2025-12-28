@@ -14,9 +14,8 @@ import FontFamily from "@tiptap/extension-font-family";
 import { DocumentHeader } from "@/components/document-header";
 import { DocumentToolbar } from "@/components/document-toolbar";
 import { DocumentEditor } from "@/components/document-editor";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Document } from "@/lib/types";
-import { useDebounce } from "@uidotdev/usehooks";
 import { CommentsSidebar } from "@/components/comments-sidebar";
 
 export const Route = createFileRoute("/document/$id")({
@@ -26,10 +25,11 @@ export const Route = createFileRoute("/document/$id")({
 function DocumentPage() {
   const { id } = Route.useParams();
 
-  const [content, setContent] = useState<JSONContent | null>(null);
   const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
-  const debouncedContent = useDebounce(content, 3000);
+  const contentRef = useRef<JSONContent | null>(null);
+  const saveTimerRef = useRef<number | null>(null);
+  const didHydrateRef = useRef<boolean>(false);
 
   const queryClient = useQueryClient();
 
@@ -90,19 +90,41 @@ function DocumentPage() {
       FontSize,
     ],
     immediatelyRender: false,
+    editable: false,
     onUpdate({ editor }) {
       if (doc?.role !== "editor") return;
-      setContent(editor.getJSON());
+
+      contentRef.current = editor.getJSON();
+
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+
+      saveTimerRef.current = window.setTimeout(() => {
+        if (!contentRef.current) return;
+        saveMutation.mutate(contentRef.current);
+      }, 3000);
     },
-    editable: doc?.role === "editor",
   });
 
   useEffect(() => {
-    if (editor && doc && !editor.isEmpty) return;
-    if (editor && doc) {
-      editor.commands.setContent(doc.content);
-    }
+    if (!editor || !doc) return;
+    if (didHydrateRef.current) return;
+
+    editor.commands.setContent(doc.content);
+    didHydrateRef.current = true;
   }, [editor, doc]);
+
+  useEffect(() => {
+    if (!editor || !doc) return;
+    editor.setEditable(doc.role === "editor");
+  }, [editor, doc]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
 
   const providerValue = useMemo(() => ({ editor }), [editor]);
 
@@ -122,14 +144,6 @@ function DocumentPage() {
       queryClient.setQueryData(["save-status", id], "saved");
     },
   });
-
-  useEffect(() => {
-    if (!debouncedContent) return;
-    if (!doc) return;
-    if (doc.role !== "editor") return;
-
-    saveMutation.mutate(debouncedContent);
-  }, [debouncedContent]);
 
   if (!doc || !editor) return null;
 
