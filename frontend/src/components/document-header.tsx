@@ -175,7 +175,7 @@ export function DocumentHeader({
             History
           </Button>
 
-          <AiMenu editor={editor} />
+          <AiMenu editor={editor} documentId={documentId} />
 
           <div className="h-6 w-px mx-1 shrink-0 bg-border" />
 

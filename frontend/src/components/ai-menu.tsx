@@ -1,12 +1,19 @@
-import { runAiCommand } from "@/lib/api";
+import { runDocumentAiCommand, runSelectionAiCommand } from "@/lib/api";
 import { getSelectionText } from "@/lib/helpers";
-import type { AiAction } from "@/lib/types";
+import type {
+  AiAction,
+  DocumentAiAction,
+  SelectionAiAction,
+} from "@/lib/types";
 import type { Editor } from "@tiptap/react";
 import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
@@ -14,7 +21,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import { Sparkles } from "lucide-react";
 
-export function AiMenu({ editor }: { editor: Editor | null }) {
+export function AiMenu({
+  editor,
+  documentId,
+}: {
+  editor: Editor | null;
+  documentId: string;
+}) {
   const [action, setAction] = useState<AiAction | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [output, setOutput] = useState<string>("");
@@ -26,17 +39,22 @@ export function AiMenu({ editor }: { editor: Editor | null }) {
   const selection = getSelectionText(editor);
   const hasSelection = selection.text.trim().length > 0;
 
-  async function execute(a: AiAction) {
+  async function executeSelection(a: SelectionAiAction) {
     if (!hasSelection) return;
 
-    setAction(a);
+    const nextAction: AiAction = {
+      scope: "selection",
+      action: a,
+    };
+
+    setAction(nextAction);
     setError("");
     setOutput("");
     setLoading(true);
     setOpen(true);
 
     try {
-      const res = await runAiCommand({
+      const res = await runSelectionAiCommand({
         action: a,
         selectionText: selection.text,
       });
@@ -53,27 +71,72 @@ export function AiMenu({ editor }: { editor: Editor | null }) {
     }
   }
 
+  async function executeDocument(a: DocumentAiAction) {
+    const nextAction: AiAction = {
+      scope: "document",
+      action: a,
+    };
+
+    setAction(nextAction);
+    setError("");
+    setOutput("");
+    setLoading(true);
+    setOpen(true);
+
+    try {
+      const res = await runDocumentAiCommand({
+        action: a,
+        documentId,
+      });
+      setOutput(res.output);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "AI failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function regenerate() {
-    if (!action || !hasSelection) return;
-    await execute(action);
+    if (!action) return;
+
+    if (action.scope === "selection") {
+      await executeSelection(action.action);
+    } else {
+      await executeDocument(action.action);
+    }
   }
 
   function apply() {
-    if (!output.trim()) return;
+    if (!output.trim() || !action) return;
 
-    const paragraphs = output.split(/\n\s*\n/).map((text) => ({
-      type: "paragraph",
-      content: [{ type: "text", text }],
-    }));
+    if (action.scope === "selection") {
+      const paragraphs = output.split(/\n\s*\n/).map((text) => ({
+        type: "paragraph",
+        content: [{ type: "text", text }],
+      }));
 
-    editor!
-      .chain()
-      .focus()
-      .insertContentAt({ from: selection.from, to: selection.to }, paragraphs)
-      .run();
+      editor!
+        .chain()
+        .focus()
+        .insertContentAt({ from: selection.from, to: selection.to }, paragraphs)
+        .run();
+    } else {
+      const paragraphs = output.split(/\n\s*\n/).map((text) => ({
+        type: "paragraph",
+        content: [{ type: "text", text }],
+      }));
+
+      editor!
+        .chain()
+        .focus()
+        .insertContentAt(0, [...paragraphs, { type: "paragraph", content: [] }])
+        .run();
+    }
 
     setOpen(false);
   }
+
+  const isDocumentAction = action?.scope === "document";
 
   return (
     <>
@@ -86,37 +149,43 @@ export function AiMenu({ editor }: { editor: Editor | null }) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem
-            disabled={!hasSelection}
-            onClick={() => execute("rewrite")}
-          >
-            Rewrite selection
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!hasSelection}
-            onClick={() => execute("fix")}
-          >
-            Fix grammar & clarity
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!hasSelection}
-            onClick={() => execute("shorten")}
-          >
-            Shorten
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!hasSelection}
-            onClick={() => execute("expand")}
-          >
-            Expand
-          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger disabled={!hasSelection}>
+              Selection
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-56">
+              <DropdownMenuItem onClick={() => executeSelection("rewrite")}>
+                Rewrite
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => executeSelection("fix")}>
+                Fix grammar & clarity
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => executeSelection("shorten")}>
+                Shorten
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => executeSelection("expand")}>
+                Expand
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>Whole document</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-56">
+              <DropdownMenuItem onClick={() => executeDocument("summarize")}>
+                Summarize
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>AI Result</DialogTitle>
+            <DialogTitle>
+              {isDocumentAction ? "Document Summary" : "AI Result"}
+            </DialogTitle>
           </DialogHeader>
 
           {error && <div className="text-sm text-red-600">{error}</div>}
@@ -144,7 +213,7 @@ export function AiMenu({ editor }: { editor: Editor | null }) {
                 Cancel
               </Button>
               <Button disabled={!output.trim()} onClick={apply}>
-                Replace selection
+                {isDocumentAction ? "Insert summary" : "Replace selection"}
               </Button>
             </div>
           </div>

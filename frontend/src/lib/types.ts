@@ -45,4 +45,9 @@ export type Comment = {
   createdAt: string;
 };
 
-export type AiAction = "rewrite" | "fix" | "shorten" | "expand";
+export type SelectionAiAction = "rewrite" | "fix" | "shorten" | "expand";
+export type DocumentAiAction = "summarize";
+
+export type AiAction =
+  | { scope: "selection"; action: SelectionAiAction }
+  | { scope: "document"; action: DocumentAiAction };
