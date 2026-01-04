@@ -44,3 +44,5 @@ export type Comment = {
   authorName: string;
   createdAt: string;
 };
+
+export type AiAction = "rewrite" | "fix" | "shorten" | "expand";

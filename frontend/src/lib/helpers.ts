@@ -1,3 +1,5 @@
+import type { Editor } from "@tiptap/react";
+
 export const fontFamilies = [
   { label: "Default", value: "" },
   { label: "Arial", value: "Arial, Helvetica, sans-serif" },
@@ -69,4 +71,12 @@ export function formatRelativeTime(date: string | Date) {
 
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+export function getSelectionText(editor: Editor) {
+  const { from, to, empty } = editor.state.selection;
+  if (empty) return { from, to, text: "" };
+
+  const text = editor.state.doc.textBetween(from, to, "\n");
+  return { from, to, text };
 }
