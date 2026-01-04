@@ -5,6 +5,7 @@ import { auth } from "./auth";
 import { cors } from "hono/cors";
 import { documentsRoute } from "./routes/documents";
 import { publicRoute } from "./routes/public";
+import { aiSelectionRoutes } from "./routes/ai/selection";
 
 const app = new Hono();
 
@@ -22,6 +23,8 @@ app.use(
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/api/documents", documentsRoute);
+
+app.route("/api/ai/selection", aiSelectionRoutes);
 
 app.route("/api/public", publicRoute);
 
