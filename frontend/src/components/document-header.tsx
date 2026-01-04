@@ -6,7 +6,6 @@ import {
   Loader2,
   MessageSquare,
   Share2,
-  Sparkles,
   Star,
   UserPlus,
 } from "lucide-react";
@@ -22,15 +21,19 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { ShareModal } from "./share-modal";
 import { InviteModal } from "./invite-modal";
+import { AiMenu } from "./ai-menu";
+import type { Editor } from "@tiptap/react";
 
 type DocumentHeaderProps = {
   documentId: string;
   setCommentsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  editor: Editor | null;
 };
 
 export function DocumentHeader({
   documentId,
   setCommentsOpen,
+  editor,
 }: DocumentHeaderProps) {
   const queryClient = useQueryClient();
 
@@ -172,10 +175,7 @@ export function DocumentHeader({
             History
           </Button>
 
-          <Button variant="ghost" size="sm" className="bg-muted">
-            <Sparkles className="mr-2 h-4 w-4" />
-            AI
-          </Button>
+          <AiMenu editor={editor} />
 
           <div className="h-6 w-px mx-1 shrink-0 bg-border" />
 

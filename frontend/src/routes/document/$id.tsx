@@ -154,6 +154,7 @@ function DocumentPage() {
           key={id}
           documentId={id}
           setCommentsOpen={setCommentsOpen}
+          editor={editor}
         />
 
         {doc.role === "editor" && <DocumentToolbar />}
