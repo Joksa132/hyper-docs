@@ -1,4 +1,4 @@
-import type { Editor } from "@tiptap/react";
+import type { Editor, JSONContent } from "@tiptap/react";
 
 export const fontFamilies = [
   { label: "Default", value: "" },
@@ -79,4 +79,94 @@ export function getSelectionText(editor: Editor) {
 
   const text = editor.state.doc.textBetween(from, to, "\n");
   return { from, to, text };
+}
+
+export function aiTextToTiptapNodes(text: string): JSONContent[] {
+  const lines = text.split("\n");
+
+  const nodes: JSONContent[] = [];
+  let listItems: JSONContent[] | null = null;
+  let listType: "bulletList" | "orderedList" | null = null;
+
+  function flushList() {
+    if (listItems && listType) {
+      nodes.push({
+        type: listType,
+        content: listItems,
+      });
+    }
+    listItems = null;
+    listType = null;
+  }
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    if (!line) {
+      flushList();
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,3})\s+(.*)/);
+    if (headingMatch) {
+      flushList();
+      nodes.push({
+        type: "heading",
+        attrs: { level: headingMatch[1].length },
+        content: [{ type: "text", text: headingMatch[2] }],
+      });
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      if (!listItems) listItems = [];
+      listType = "orderedList";
+
+      listItems.push({
+        type: "listItem",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: line.replace(/^\d+\.\s+/, ""),
+              },
+            ],
+          },
+        ],
+      });
+      continue;
+    }
+
+    if (/^[-*•]\s+/.test(line)) {
+      if (!listItems) listItems = [];
+      listType = "bulletList";
+
+      listItems.push({
+        type: "listItem",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: line.replace(/^[-*•]\s+/, ""),
+              },
+            ],
+          },
+        ],
+      });
+      continue;
+    }
+
+    flushList();
+    nodes.push({
+      type: "paragraph",
+      content: [{ type: "text", text: line }],
+    });
+  }
+
+  flushList();
+  return nodes;
 }

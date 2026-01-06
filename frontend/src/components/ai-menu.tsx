@@ -1,5 +1,5 @@
 import { runDocumentAiCommand, runSelectionAiCommand } from "@/lib/api";
-import { getSelectionText } from "@/lib/helpers";
+import { aiTextToTiptapNodes, getSelectionText } from "@/lib/helpers";
 import type {
   AiAction,
   DocumentAiAction,
@@ -121,15 +121,23 @@ export function AiMenu({
         .insertContentAt({ from: selection.from, to: selection.to }, paragraphs)
         .run();
     } else {
-      const paragraphs = output.split(/\n\s*\n/).map((text) => ({
-        type: "paragraph",
-        content: [{ type: "text", text }],
-      }));
+      // const paragraphs = output.split(/\n\s*\n/).map((text) => ({
+      //   type: "paragraph",
+      //   content: [{ type: "text", text }],
+      // }));
+
+      // editor!
+      //   .chain()
+      //   .focus()
+      //   .insertContentAt(0, [...paragraphs, { type: "paragraph", content: [] }])
+      //   .run();
+
+      const nodes = aiTextToTiptapNodes(output);
 
       editor!
         .chain()
         .focus()
-        .insertContentAt(0, [...paragraphs, { type: "paragraph", content: [] }])
+        .insertContentAt(0, [...nodes, { type: "paragraph", content: [] }])
         .run();
     }
 
