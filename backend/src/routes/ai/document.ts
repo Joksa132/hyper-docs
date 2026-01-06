@@ -64,12 +64,13 @@ aiDocumentRoutes.post("/", async (c) => {
 
   const systemPrompt =
     "You are an assistant embedded in a document editor. " +
-    "Summarize documents clearly and concisely. " +
+    "Return clean, well-structured text only. " +
+    "Use paragraphs, bullet points (-), numbered lists (1.), and headings (##) where appropriate. " +
     "Do not mention that this is a summary.";
 
   const userPrompt =
     `Summarize the following document in a clear, concise way. ` +
-    `Use short paragraphs or bullet points where appropriate.\n\n` +
+    `Use short paragraphs, bullet points, numbered lists or headings only where appropriate.\n\n` +
     `Title: ${doc.title ?? "Untitled"}\n\n` +
     plainText;
 
