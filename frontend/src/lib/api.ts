@@ -1,4 +1,4 @@
-import type { SelectionAiAction } from "./types";
+import type { DocumentAiAction, SelectionAiAction } from "./types";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,7 +41,7 @@ export async function runSelectionAiCommand(payload: {
 }
 
 export async function runDocumentAiCommand(payload: {
-  action: "summarize";
+  action: DocumentAiAction;
   documentId: string;
 }) {
   const res = await fetch(`${API_URL}/api/ai/document`, {
