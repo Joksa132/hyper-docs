@@ -69,8 +69,7 @@ aiDocumentRoutes.post("/", async (c) => {
     "Do not mention that this is a summary.";
 
   const userPrompt =
-    `Summarize the following document in a clear, concise way. ` +
-    `Use short paragraphs, bullet points, numbered lists or headings only where appropriate.\n\n` +
+    `Summarize the following document in a clear, concise way.\n\n` +
     `Title: ${doc.title ?? "Untitled"}\n\n` +
     plainText;
 
