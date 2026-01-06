@@ -31,9 +31,15 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { fontFamilies, highlightColors, textColors } from "@/lib/helpers";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Input } from "./ui/input";
 
 export function DocumentToolbar() {
   const { editor } = useCurrentEditor();
+
+  const [linkOpen, setLinkOpen] = useState<boolean>(false);
+  const [linkUrl, setLinkUrl] = useState<string>("");
 
   const state = useEditorState({
     editor,
@@ -79,6 +85,20 @@ export function DocumentToolbar() {
       };
     },
   });
+
+  function applyLink() {
+    if (!editor || !linkUrl.trim()) return;
+
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: linkUrl.trim() })
+      .run();
+
+    setLinkOpen(false);
+    setLinkUrl("");
+  }
 
   return (
     <div className="flex items-center gap-1 border-b border-border px-4 py-2">
@@ -413,11 +433,23 @@ export function DocumentToolbar() {
             size="sm"
             data-active={state?.isLink}
             className="h-8 px-2 data-[active=true]:bg-primary"
+            onClick={() => {
+              if (!editor) return;
+
+              if (state?.isLink) {
+                editor.chain().focus().unsetLink().run();
+              } else {
+                setLinkUrl("");
+                setLinkOpen(true);
+              }
+            }}
           >
             <Link2 className="w-4 h-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Insert Link</TooltipContent>
+        <TooltipContent>
+          {state?.isLink ? "Remove link" : "Insert link"}
+        </TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -558,6 +590,37 @@ export function DocumentToolbar() {
       <div className="h-6 w-px shrink-0 bg-border" />
 
       <div>Presence Typing</div>
+
+      <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Insert link</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <Input
+              autoFocus
+              placeholder="https://example.com"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  applyLink();
+                }
+              }}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setLinkOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={applyLink} disabled={!linkUrl.trim()}>
+                Apply
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
