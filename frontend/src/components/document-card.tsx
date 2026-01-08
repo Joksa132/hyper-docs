@@ -22,11 +22,23 @@ export function DocumentCard({ doc, variant = "default" }: DocumentCardProps) {
       });
     },
     onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["documents"] });
+      await queryClient.cancelQueries({ queryKey: ["documents", "starred"] });
+
       queryClient.setQueryData<Document[]>(["documents"], (old) =>
         old?.map((d) =>
           d.id === doc.id ? { ...d, isStarred: !d.isStarred } : d
         )
       );
+
+      queryClient.setQueryData<Document[]>(["documents", "starred"], (old) =>
+        doc.isStarred ? old?.filter((d) => d.id !== doc.id) : old
+      );
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["documents", "starred"] });
     },
   });
 
