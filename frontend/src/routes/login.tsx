@@ -28,10 +28,12 @@ function LoginPage() {
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
     try {
       if (isSignUp) {
@@ -42,6 +44,17 @@ function LoginPage() {
         });
 
         if (error) {
+          switch (error.code) {
+            case "USER_ALREADY_EXISTS":
+            case "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL":
+              setErrorMessage("An account with this email already exists.");
+              break;
+            case "INVALID_PASSWORD":
+              setErrorMessage("Password does not meet requirements.");
+              break;
+            default:
+              setErrorMessage(error.message || "Failed to create account.");
+          }
           return;
         }
 
@@ -55,12 +68,20 @@ function LoginPage() {
       });
 
       if (error) {
+        switch (error.code) {
+          case "INVALID_CREDENTIALS":
+          case "USER_NOT_FOUND":
+            setErrorMessage("Invalid email or password.");
+            break;
+          default:
+            setErrorMessage(error.message || "Failed to sign in.");
+        }
         return;
       }
 
       router.navigate({ to: "/" });
-    } catch (error) {
-      console.log(error);
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.");
     }
   };
 
@@ -177,6 +198,12 @@ function LoginPage() {
                 required
               />
             </div>
+
+            {errorMessage && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive mb-4">
+                {errorMessage}
+              </div>
+            )}
 
             <Button type="submit" className="w-full font-semibold">
               {isSignUp ? "Create account" : "Sign in"}
