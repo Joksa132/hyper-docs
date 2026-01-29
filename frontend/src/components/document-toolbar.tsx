@@ -34,8 +34,14 @@ import { fontFamilies, highlightColors, textColors } from "@/lib/helpers";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
+import { TypingIndicator } from "./typing-indicator";
+import type { Collaborator } from "@/hooks/use-collaboration";
 
-export function DocumentToolbar() {
+type DocumentToolbarProps = {
+  collaborators: Collaborator[];
+};
+
+export function DocumentToolbar({ collaborators }: DocumentToolbarProps) {
   const { editor } = useCurrentEditor();
 
   const [linkOpen, setLinkOpen] = useState<boolean>(false);
@@ -70,10 +76,10 @@ export function DocumentToolbar() {
         headingLevel: editor.isActive("heading", { level: 1 })
           ? 1
           : editor.isActive("heading", { level: 2 })
-          ? 2
-          : editor.isActive("heading", { level: 3 })
-          ? 3
-          : null,
+            ? 2
+            : editor.isActive("heading", { level: 3 })
+              ? 3
+              : null,
 
         fontSize:
           editor.getAttributes("textStyle").fontSize?.replace("px", "") ?? "14",
@@ -587,9 +593,9 @@ export function DocumentToolbar() {
         <TooltipContent>Code</TooltipContent>
       </Tooltip>
 
-      <div className="h-6 w-px shrink-0 bg-border" />
+      <div className="flex-1" />
 
-      <div>Presence Typing</div>
+      <TypingIndicator collaborators={collaborators} />
 
       <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
         <DialogContent className="sm:max-w-md">

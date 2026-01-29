@@ -23,17 +23,21 @@ import { ShareModal } from "./share-modal";
 import { InviteModal } from "./invite-modal";
 import { AiMenu } from "./ai-menu";
 import type { Editor } from "@tiptap/react";
+import { PresenceAvatars } from "./presence-avatars";
+import type { Collaborator } from "@/hooks/use-collaboration";
 
 type DocumentHeaderProps = {
   documentId: string;
   setCommentsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   editor: Editor | null;
+  collaborators: Collaborator[];
 };
 
 export function DocumentHeader({
   documentId,
   setCommentsOpen,
   editor,
+  collaborators,
 }: DocumentHeaderProps) {
   const queryClient = useQueryClient();
 
@@ -59,7 +63,7 @@ export function DocumentHeader({
       await queryClient.cancelQueries({ queryKey: ["document", documentId] });
 
       queryClient.setQueryData<Document>(["document", documentId], (old) =>
-        old ? { ...old, ...data } : old
+        old ? { ...old, ...data } : old,
       );
     },
   });
@@ -86,7 +90,7 @@ export function DocumentHeader({
       await queryClient.cancelQueries({ queryKey: ["document", documentId] });
 
       queryClient.setQueryData<Document>(["document", documentId], (old) =>
-        old ? { ...old, isStarred: !old.isStarred } : old
+        old ? { ...old, isStarred: !old.isStarred } : old,
       );
     },
     onSuccess: () => {
@@ -156,9 +160,11 @@ export function DocumentHeader({
         </div>
 
         <div className="flex items-center gap-2">
-          <div>Presence avatars</div>
+          <PresenceAvatars collaborators={collaborators} />
 
-          <div className="h-6 w-px mx-1 shrink-0 bg-border" />
+          {collaborators.length > 0 && (
+            <div className="h-6 w-px mx-1 shrink-0 bg-border" />
+          )}
 
           <Button
             variant="ghost"
