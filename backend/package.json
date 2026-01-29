@@ -3,8 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "tsx src/index.ts",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hocuspocus/server": "^3.4.4",
@@ -27,6 +28,7 @@
     "nanoid": "^5.1.6",
     "openai": "^6.15.0",
     "pg": "^8.16.3",
+    "tsx": "^4.7.1",
     "ws": "^8.19.0"
   },
   "devDependencies": {
@@ -34,7 +36,6 @@
     "@types/pg": "^8.16.0",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.8",
-    "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   }
 }

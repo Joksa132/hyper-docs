@@ -68,6 +68,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      tsx:
+        specifier: ^4.7.1
+        version: 4.21.0
       ws:
         specifier: ^8.19.0
         version: 8.19.0
@@ -84,9 +87,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.8
         version: 0.31.8
-      tsx:
-        specifier: ^4.7.1
-        version: 4.21.0
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
