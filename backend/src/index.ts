@@ -15,7 +15,14 @@ const app = new Hono();
 app.use(
   "/api/*",
   cors({
-    origin: `${process.env.FRONTEND_URL}`,
+    origin: (origin) => {
+      const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, "");
+      const originWithoutSlash = origin?.replace(/\/$/, "");
+      if (originWithoutSlash === frontendUrl) {
+        return origin;
+      }
+      return null;
+    },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
