@@ -57,8 +57,8 @@ function DocumentPage({ id }: { id: string }) {
           heading: {
             levels: [1, 2, 3],
           },
-          history: false,
-        }),
+          history: false as const,
+        } as Parameters<typeof StarterKit.configure>[0]),
         Underline_,
         TextAlign.configure({
           types: ["heading", "paragraph"],
