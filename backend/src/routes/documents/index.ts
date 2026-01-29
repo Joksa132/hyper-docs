@@ -5,6 +5,7 @@ import { singleRoutes } from "./single";
 import { sharingRoutes } from "./sharing";
 import { starRoutes } from "./stars";
 import { commentRoutes } from "./comments";
+import { collabRoutes } from "./collab";
 
 export const documentsRoute = new Hono();
 
@@ -13,3 +14,4 @@ documentsRoute.route("/", singleRoutes);
 documentsRoute.route("/", sharingRoutes);
 documentsRoute.route("/", starRoutes);
 documentsRoute.route("/", commentRoutes);
+documentsRoute.route("/", collabRoutes);
