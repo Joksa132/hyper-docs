@@ -11,20 +11,25 @@ import Highlight from "@tiptap/extension-highlight";
 import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import FontFamily from "@tiptap/extension-font-family";
+import Collaboration from "@tiptap/extension-collaboration";
 import { DocumentHeader } from "@/components/document-header";
 import { DocumentToolbar } from "@/components/document-toolbar";
 import { DocumentEditor } from "@/components/document-editor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Document } from "@/lib/types";
 import { CommentsSidebar } from "@/components/comments-sidebar";
+import { useCollaboration } from "@/hooks/use-collaboration";
 
 export const Route = createFileRoute("/document/$id")({
-  component: DocumentPage,
+  component: DocumentPageWrapper,
 });
 
-function DocumentPage() {
+function DocumentPageWrapper() {
   const { id } = Route.useParams();
+  return <DocumentPage key={id} id={id} />;
+}
 
+function DocumentPage({ id }: { id: string }) {
   const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
   const contentRef = useRef<JSONContent | null>(null);
@@ -32,6 +37,9 @@ function DocumentPage() {
   const didHydrateRef = useRef<boolean>(false);
 
   const queryClient = useQueryClient();
+
+  const { provider, ydoc, isSynced, collaborators, setTyping } =
+    useCollaboration(id);
 
   const getDocument = async (id: string) => {
     return apiFetch<Document>(`/api/documents/${id}`);
@@ -42,76 +50,92 @@ function DocumentPage() {
     queryFn: () => getDocument(id),
   });
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
-      }),
-      Underline_,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-      TiptapImage.configure({
-        HTMLAttributes: {
-          class: "rounded-lg max-w-full",
-        },
-      }),
-      TiptapLink.configure({
-        autolink: true,
-        linkOnPaste: true,
-        openOnClick: false,
-        enableClickSelection: true,
-        defaultProtocol: "https",
-        HTMLAttributes: {
-          class: "text-blue-500 underline cursor-pointer",
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        isAllowedUri: (url, ctx) => {
-          if (!ctx.defaultValidate(url)) return false;
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          heading: {
+            levels: [1, 2, 3],
+          },
+          history: false,
+        }),
+        Underline_,
+        TextAlign.configure({
+          types: ["heading", "paragraph"],
+        }),
+        TiptapImage.configure({
+          HTMLAttributes: {
+            class: "rounded-lg max-w-full",
+          },
+        }),
+        TiptapLink.configure({
+          autolink: true,
+          linkOnPaste: true,
+          openOnClick: false,
+          enableClickSelection: true,
+          defaultProtocol: "https",
+          HTMLAttributes: {
+            class: "text-blue-500 underline cursor-pointer",
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+          isAllowedUri: (url, ctx) => {
+            if (!ctx.defaultValidate(url)) return false;
 
-          if (url.startsWith("javascript:")) return false;
-          if (url.startsWith("./") || url.startsWith("/")) return false;
+            if (url.startsWith("javascript:")) return false;
+            if (url.startsWith("./") || url.startsWith("/")) return false;
 
-          return true;
-        },
-        shouldAutoLink: (url) => {
-          return url.startsWith("https://") || url.startsWith("http://");
-        },
-      }),
-      Highlight.configure({
-        multicolor: true,
-      }),
-      TextStyle,
-      Color,
-      FontFamily,
-      FontSize,
-    ],
-    immediatelyRender: false,
-    editable: false,
-    onUpdate({ editor }) {
-      if (doc?.role !== "editor") return;
+            return true;
+          },
+          shouldAutoLink: (url) => {
+            return url.startsWith("https://") || url.startsWith("http://");
+          },
+        }),
+        Highlight.configure({
+          multicolor: true,
+        }),
+        TextStyle,
+        Color,
+        FontFamily,
+        FontSize,
+        ...(provider
+          ? [
+              Collaboration.configure({
+                document: ydoc,
+                field: "default",
+              }),
+            ]
+          : []),
+      ],
+      immediatelyRender: false,
+      editable: false,
+      onUpdate({ editor }) {
+        if (doc?.role !== "editor") return;
 
-      contentRef.current = editor.getJSON();
+        setTyping(true);
 
-      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+        contentRef.current = editor.getJSON();
 
-      saveTimerRef.current = window.setTimeout(() => {
-        if (!contentRef.current) return;
-        saveMutation.mutate(contentRef.current);
-      }, 3000);
+        if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+
+        saveTimerRef.current = window.setTimeout(() => {
+          if (!contentRef.current) return;
+          saveMutation.mutate(contentRef.current);
+        }, 3000);
+      },
     },
-  });
+    [provider],
+  );
 
   useEffect(() => {
-    if (!editor || !doc) return;
+    if (!editor || !doc || !isSynced) return;
     if (didHydrateRef.current) return;
 
-    editor.commands.setContent(doc.content);
+    if (editor.isEmpty) {
+      editor.commands.setContent(doc.content);
+    }
     didHydrateRef.current = true;
-  }, [editor, doc]);
+  }, [editor, doc, isSynced]);
 
   useEffect(() => {
     if (!editor || !doc) return;
@@ -155,9 +179,12 @@ function DocumentPage() {
           documentId={id}
           setCommentsOpen={setCommentsOpen}
           editor={editor}
+          collaborators={collaborators}
         />
 
-        {doc.role === "editor" && <DocumentToolbar />}
+        {doc.role === "editor" && (
+          <DocumentToolbar collaborators={collaborators} />
+        )}
 
         <DocumentEditor />
 
