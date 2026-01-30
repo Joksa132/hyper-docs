@@ -31,6 +31,7 @@ function DocumentPageWrapper() {
 
 function DocumentPage({ id }: { id: string }) {
   const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
+  const [zoom, setZoom] = useState<number>(100);
 
   const contentRef = useRef<JSONContent | null>(null);
   const saveTimerRef = useRef<number | null>(null);
@@ -183,10 +184,14 @@ function DocumentPage({ id }: { id: string }) {
         />
 
         {doc.role === "editor" && (
-          <DocumentToolbar collaborators={collaborators} />
+          <DocumentToolbar
+            collaborators={collaborators}
+            zoom={zoom}
+            onZoomChange={setZoom}
+          />
         )}
 
-        <DocumentEditor />
+        <DocumentEditor zoom={zoom} />
 
         {commentsOpen && (
           <CommentsSidebar

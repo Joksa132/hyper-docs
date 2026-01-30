@@ -237,3 +237,46 @@
   pointer-events: none;
   height: 0;
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0.5in;
+  }
+
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  header,
+  .document-toolbar,
+  .comments-sidebar,
+  [data-radix-popper-content-wrapper] {
+    display: none !important;
+  }
+
+  .ProseMirror {
+    min-height: 100vh !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .document-editor-container,
+  .flex-1.justify-center {
+    transform: none !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  .bg-white.shadow-md {
+    box-shadow: none !important;
+    max-width: none !important;
+    transform: none !important;
+  }
+}

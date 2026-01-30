@@ -37,11 +37,19 @@ import { Input } from "./ui/input";
 import { TypingIndicator } from "./typing-indicator";
 import type { Collaborator } from "@/hooks/use-collaboration";
 
+const ZOOM_LEVELS = [50, 75, 90, 100, 125, 150, 200];
+
 type DocumentToolbarProps = {
   collaborators: Collaborator[];
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
 };
 
-export function DocumentToolbar({ collaborators }: DocumentToolbarProps) {
+export function DocumentToolbar({
+  collaborators,
+  zoom,
+  onZoomChange,
+}: DocumentToolbarProps) {
   const { editor } = useCurrentEditor();
 
   const [linkOpen, setLinkOpen] = useState<boolean>(false);
@@ -107,7 +115,7 @@ export function DocumentToolbar({ collaborators }: DocumentToolbarProps) {
   }
 
   return (
-    <div className="flex items-center gap-1 border-b border-border px-4 py-2">
+    <div className="document-toolbar flex items-center gap-1 border-b border-border px-4 py-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -140,7 +148,12 @@ export function DocumentToolbar({ collaborators }: DocumentToolbarProps) {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            onClick={() => window.print()}
+          >
             <Printer className="w-4 h-4" />
           </Button>
         </TooltipTrigger>
@@ -150,16 +163,53 @@ export function DocumentToolbar({ collaborators }: DocumentToolbarProps) {
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              disabled={zoom <= ZOOM_LEVELS[0]}
+              onClick={() => {
+                const currentIndex = ZOOM_LEVELS.indexOf(zoom);
+                const newIndex = Math.max(0, currentIndex - 1);
+                onZoomChange(ZOOM_LEVELS[newIndex]);
+              }}
+            >
               <ZoomOut className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Zoom Out</TooltipContent>
         </Tooltip>
-        <span className="text-xs min-w-6 text-center">100%</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 px-2 min-w-[52px]">
+              <span className="text-xs">{zoom}%</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {ZOOM_LEVELS.map((level) => (
+              <DropdownMenuItem
+                key={level}
+                onClick={() => onZoomChange(level)}
+                data-active={zoom === level}
+              >
+                {level}%
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              disabled={zoom >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+              onClick={() => {
+                const currentIndex = ZOOM_LEVELS.indexOf(zoom);
+                const newIndex = Math.min(ZOOM_LEVELS.length - 1, currentIndex + 1);
+                onZoomChange(ZOOM_LEVELS[newIndex]);
+              }}
+            >
               <ZoomIn className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
