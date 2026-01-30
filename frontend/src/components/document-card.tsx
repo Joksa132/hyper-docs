@@ -1,7 +1,7 @@
 import type { Document } from "@/lib/types";
 import { Link } from "@tanstack/react-router";
 import { Button } from "./ui/button";
-import { RotateCcw, Star, Trash2 } from "lucide-react";
+import { FileText, RotateCcw, Star, Trash2, Users } from "lucide-react";
 import { formatRelativeTime } from "@/lib/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
@@ -69,7 +69,7 @@ export function DocumentCard({ doc, variant = "default" }: DocumentCardProps) {
   });
 
   const card = (
-    <div className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:shadow-lg">
+    <div className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
       <CardContent
         doc={doc}
         variant={variant}
@@ -109,23 +109,34 @@ function CardContent({
 }) {
   return (
     <>
-      <div className="relative aspect-4/3 min-h-[220px] bg-muted/30 p-4">
-        <div className="flex flex-col gap-2">
-          <div className="h-3 w-3/4 rounded bg-muted" />
-          <div className="h-2 w-full rounded bg-muted" />
-          <div className="h-2 w-5/6 rounded bg-muted" />
-          <div className="h-2 w-4/6 rounded bg-muted" />
+      <div className="relative aspect-4/3 min-h-[180px] bg-muted/20 p-5 overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-300" />
+
+        <div className="relative bg-white rounded-lg shadow-sm border border-border/50 p-4 h-full">
+          <div className="flex flex-col gap-2.5">
+            <div className="h-2.5 w-2/3 rounded-full bg-muted/80" />
+            <div className="h-2 w-full rounded-full bg-muted/50" />
+            <div className="h-2 w-5/6 rounded-full bg-muted/50" />
+            <div className="h-2 w-3/4 rounded-full bg-muted/50" />
+            <div className="h-2 w-4/6 rounded-full bg-muted/40" />
+          </div>
         </div>
 
+        {doc.isStarred && variant === "default" && (
+          <div className="absolute left-3 top-3">
+            <Star className="h-4 w-4 fill-primary text-primary" />
+          </div>
+        )}
+
         <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          {variant === "default" && !doc.isOwner && (
+          {variant === "default" && (
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 bg-white/90 backdrop-blur-sm shadow-sm"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -134,7 +145,7 @@ function CardContent({
                   >
                     <Star
                       className={`h-4 w-4 ${
-                        doc.isStarred && "fill-primary text-primary"
+                        doc.isStarred ? "fill-primary text-primary" : ""
                       }`}
                     />
                   </Button>
@@ -149,7 +160,7 @@ function CardContent({
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 bg-white/90 backdrop-blur-sm shadow-sm"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -171,7 +182,7 @@ function CardContent({
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 bg-white/90 backdrop-blur-sm shadow-sm"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -189,7 +200,7 @@ function CardContent({
                   <Button
                     variant="destructive"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 shadow-sm"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -212,20 +223,33 @@ function CardContent({
         </div>
       </div>
 
-      <div className="border-t border-border px-5 py-4">
-        <p className="truncate font-medium text-lg">
-          {doc.title || "Untitled document"}
-        </p>
-        {doc.ownerName && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Shared by {doc.ownerName}
-          </p>
-        )}
-        <p className="mt-1 text-xs text-muted-foreground">
-          {variant === "trash"
-            ? "In trash"
-            : `Edited ${formatRelativeTime(doc.updatedAt)}`}
-        </p>
+      <div className="border-t border-border px-4 py-3.5">
+        <div className="flex items-start gap-3">
+          <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 shrink-0">
+            <FileText className="h-4 w-4 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium leading-tight">
+              {doc.title || "Untitled document"}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              {doc.ownerName && (
+                <>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    {doc.ownerName}
+                  </span>
+                  <span className="text-muted-foreground/50">·</span>
+                </>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {variant === "trash"
+                  ? "In trash"
+                  : formatRelativeTime(doc.updatedAt)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

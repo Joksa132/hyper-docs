@@ -53,23 +53,31 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   });
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar>
-        <SidebarHeader>
-          <Link to="/dashboard" className="h-16 flex items-center gap-2 px-6">
-            <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-4 w-4 text-primary-foreground" />
+    <Sidebar>
+        <SidebarHeader className="border-b border-border/50">
+          <Link to="/dashboard" className="h-16 flex items-center gap-3 px-6">
+            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-primary shadow-sm">
+              <FileText className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">HyperDocs</span>
+            <span className="text-xl font-bold tracking-tight">HyperDocs</span>
           </Link>
         </SidebarHeader>
 
         <SidebarContent>
           <div className="p-4">
-            <Button className="w-full gap-2" onClick={() => handleNewDoc()}>
+            <Button
+              className="w-full gap-2 shadow-sm"
+              onClick={() => handleNewDoc()}
+            >
               <Plus className="h-4 w-4" />
               New document
             </Button>
+          </div>
+
+          <div className="px-4 py-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Documents
+            </span>
           </div>
 
           <SidebarMenu>
@@ -112,7 +120,15 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+          </SidebarMenu>
 
+          <div className="px-4 py-2 mt-4">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Other
+            </span>
+          </div>
+
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -127,13 +143,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter>
+        <SidebarFooter className="border-t border-border/50">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton className="h-auto py-2 cursor-pointer">
-                    <div className="h-8 w-8 flex items-center justify-center rounded-full bg-cyan-500 text-sm font-medium text-white">
+                  <SidebarMenuButton className="h-auto py-3 cursor-pointer">
+                    <div className="h-9 w-9 flex items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground shadow-sm">
                       {userInitials}
                     </div>
                     <div className="flex flex-1 flex-col items-start overflow-hidden">
@@ -166,6 +182,5 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-    </div>
   );
 }

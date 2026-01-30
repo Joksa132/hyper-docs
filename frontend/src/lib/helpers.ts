@@ -1,7 +1,7 @@
 import type { Editor, JSONContent } from "@tiptap/react";
 
 export const fontFamilies = [
-  { label: "Default", value: "" },
+  { label: "Inter", value: "" },
   { label: "Arial", value: "Arial, Helvetica, sans-serif" },
   { label: "Calibri", value: "Calibri, Arial, sans-serif" },
   { label: "Verdana", value: "Verdana, Geneva, sans-serif" },
@@ -9,7 +9,6 @@ export const fontFamilies = [
   { label: "Times New Roman", value: '"Times New Roman", Times, serif' },
   { label: "Georgia", value: "Georgia, serif" },
   { label: "Courier New", value: '"Courier New", Courier, monospace' },
-  { label: "Inter", value: "Inter" },
   { label: "Roboto", value: "Roboto, sans-serif" },
   { label: "Open Sans", value: "Open Sans, sans-serif" },
   { label: "Poppins", value: "Poppins, sans-serif" },
