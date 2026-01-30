@@ -87,7 +87,7 @@ function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="flex flex-1 flex-col justify-center px-6 py-12 bg-linear-to-br from-background to-muted/30">
+      <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-linear-to-br from-background to-muted/30">
         <div className="mx-auto w-full max-w-md">
           <Link to="/" className="mb-8 flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
@@ -222,7 +222,7 @@ function LoginPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-linear-to-br from-primary/10 via-primary/5 to-background overflow-hidden">
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-linear-to-br from-primary/10 via-primary/5 to-background overflow-hidden">
         <div className="max-w-md px-8 text-center">
           <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
             <FileText className="h-8 w-8 text-primary-foreground" />
