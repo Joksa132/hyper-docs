@@ -17,6 +17,25 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/public/$token")({
+  loader: async ({ params }) => {
+    try {
+      const doc = await apiFetch<Document>(`/api/public/${params.token}`);
+      return { title: doc.title };
+    } catch {
+      return { title: null };
+    }
+  },
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: `${loaderData?.title || "Shared Document"} - HyperDocs` },
+      {
+        name: "description",
+        content: loaderData?.title
+          ? `View "${loaderData.title}" on HyperDocs.`
+          : "View this shared document on HyperDocs.",
+      },
+    ],
+  }),
   component: PublicDocumentPage,
 });
 

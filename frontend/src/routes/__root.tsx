@@ -1,4 +1,5 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
+import { createPortal } from "react-dom";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -6,8 +7,11 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <div className="min-h-screen antialiased">
-      <Outlet />
-    </div>
+    <>
+      {createPortal(<HeadContent />, document.head)}
+      <div className="min-h-screen antialiased">
+        <Outlet />
+      </div>
+    </>
   );
 }

@@ -14,6 +14,9 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/dashboard")({
+  head: () => ({
+    meta: [{ title: "Dashboard - HyperDocs" }],
+  }),
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession();
 

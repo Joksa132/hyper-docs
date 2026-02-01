@@ -13,6 +13,15 @@ import { Facebook, FileText, Github } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [
+      { title: "Sign In - HyperDocs" },
+      {
+        name: "description",
+        content: "Sign in to HyperDocs to create and collaborate on documents.",
+      },
+    ],
+  }),
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession();
 

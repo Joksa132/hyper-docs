@@ -21,6 +21,13 @@ import { CommentsSidebar } from "@/components/comments-sidebar";
 import { useCollaboration } from "@/hooks/use-collaboration";
 
 export const Route = createFileRoute("/document/$id")({
+  loader: async ({ params }) => {
+    const doc = await apiFetch<Document>(`/api/documents/${params.id}`);
+    return { title: doc.title };
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.title || "Document"} - HyperDocs` }],
+  }),
   component: DocumentPageWrapper,
 });
 
@@ -150,6 +157,12 @@ function DocumentPage({ id }: { id: string }) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (doc?.title) {
+      document.title = `${doc.title} - HyperDocs`;
+    }
+  }, [doc?.title]);
 
   const providerValue = useMemo(() => ({ editor }), [editor]);
 

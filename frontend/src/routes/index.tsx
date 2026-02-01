@@ -11,6 +11,16 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "HyperDocs - Collaborative Document Editor" },
+      {
+        name: "description",
+        content:
+          "Create, edit, and collaborate on documents in real-time with AI-powered writing assistance.",
+      },
+    ],
+  }),
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession();
 
